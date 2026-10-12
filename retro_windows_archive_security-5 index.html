@@ -1,0 +1,885 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="description" content="Museu interativo de interfaces, ferramentas e história do Windows 95 e Windows XP.">
+<title>Retro Windows Archive</title>
+<style>
+:root{
+  --desktop:#008080;--panel:#c0c0c0;--panel-light:#fff;--panel-dark:#808080;
+  --ink:#111;--blue:#000080;--title1:#000080;--title2:#1084d0;--button:#c0c0c0;
+  --window:#c0c0c0;--workspace:#fff;--accent:#000080;--muted:#444;
+  --shadow:rgba(0,0,0,.35);
+}
+*{box-sizing:border-box}
+html,body{margin:0;min-height:100%;font-family:Tahoma,Verdana,Arial,sans-serif;color:var(--ink)}
+body{background:var(--desktop);font-size:13px;overflow-x:hidden}
+button,input{font:inherit}
+button{cursor:pointer;color:var(--ink)}
+button:focus-visible,input:focus-visible{outline:2px dotted #000;outline-offset:2px}
+.desktop{min-height:100vh;padding:22px 20px 64px;display:flex;align-items:flex-start;justify-content:center}
+.window{width:min(1120px,100%);background:var(--window);border:2px solid;border-color:var(--panel-light) var(--panel-dark) var(--panel-dark) var(--panel-light);box-shadow:2px 2px 0 rgba(0,0,0,.25);padding:3px}
+.titlebar{height:29px;background:linear-gradient(90deg,var(--title1),var(--title2));color:#fff;display:flex;align-items:center;justify-content:space-between;padding:3px 4px 3px 8px;font-weight:bold;letter-spacing:.1px}
+.titlebar-name{display:flex;align-items:center;gap:8px;min-width:0}
+.titlebar-name span:last-child{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.mini-logo{width:16px;height:16px;display:inline-grid;place-items:center;background:#e7eef9;color:#123d85;border:1px solid #fff;font-size:10px;font-weight:bold;flex-shrink:0}
+.window-controls{display:flex;gap:3px}
+.window-controls button{width:22px;height:21px;padding:0;line-height:16px;font-weight:bold;background:var(--button);border:2px solid;border-color:#fff #404040 #404040 #fff}
+.menubar{display:flex;gap:0;padding:3px 0;border-bottom:1px solid #888}
+.menu-button{border:1px solid transparent;background:transparent;padding:4px 9px}
+.menu-button:hover,.menu-button:focus-visible{border-color:#777;background:#ddd}
+.toolbar{display:flex;align-items:center;gap:8px;padding:9px 7px;border-bottom:1px solid #888;flex-wrap:wrap}
+.toolbar button,.retro-button{background:var(--button);border:2px solid;border-color:#fff #555 #555 #fff;padding:6px 10px;min-height:30px}
+.toolbar button:active,.retro-button:active{border-color:#555 #fff #fff #555;transform:translate(1px,1px)}
+.address{display:flex;align-items:center;gap:7px;flex:1;min-width:190px}
+.address label{font-weight:bold}
+.address input,.search-wrap input{min-width:0;width:100%;background:#fff;border:2px solid;border-color:#555 #fff #fff #555;padding:7px}
+.search-wrap{display:flex;gap:5px;min-width:min(260px,100%);flex:0 1 290px}
+.main-layout{display:grid;grid-template-columns:220px minmax(0,1fr);gap:8px;padding:8px;min-height:530px}
+.sidebar{background:var(--workspace);border:2px solid;border-color:#555 #fff #fff #555;padding:12px 10px}
+.side-heading{font-size:12px;font-weight:bold;color:var(--accent);margin:0 0 10px}
+.nav-list{display:grid;gap:4px}
+.nav-item{display:flex;align-items:center;gap:9px;text-align:left;width:100%;background:transparent;border:1px solid transparent;padding:8px 7px}
+.nav-item:hover{background:#e5eefb;border-color:#9db8df}
+.nav-item.active{background:#d8e7fb;border-color:#7b9bc7;font-weight:bold}
+.folder-icon{display:inline-block;width:23px;height:17px;flex-shrink:0;position:relative;background:#f4d35e;border:1px solid #a98526;border-radius:1px}
+.folder-icon:before{content:"";position:absolute;left:1px;top:-5px;width:10px;height:5px;background:#f4d35e;border:1px solid #a98526;border-bottom:0}
+.file-icon{width:19px;height:23px;flex-shrink:0;background:#fff;border:1px solid #777;position:relative}
+.file-icon:after{content:"";position:absolute;left:4px;right:3px;top:7px;height:1px;background:#777;box-shadow:0 4px #777,0 8px #777}
+.side-note{margin-top:18px;padding:10px;background:#ffffe1;border:1px solid #c8bd75;line-height:1.5}
+.content{min-width:0;background:var(--workspace);border:2px solid;border-color:#555 #fff #fff #555;padding:15px}
+.welcome{background:linear-gradient(110deg,#eaf4ff,#fff);border:1px solid #9db8df;padding:15px;margin-bottom:14px}
+.welcome h1{font-size:23px;margin:0 0 7px;color:#073c86}
+.welcome p{margin:0;line-height:1.6;max-width:720px}
+.content-top{display:flex;align-items:end;justify-content:space-between;gap:12px;flex-wrap:wrap;margin-bottom:12px}
+.content-top h2{font-size:17px;margin:0}
+.result-count{font-size:11px;color:var(--muted)}
+.cards{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}
+.card{border:1px solid #a3a3a3;background:#fafafa;min-width:0;display:flex;flex-direction:column}
+.card-head{display:flex;align-items:center;gap:10px;padding:10px;background:#ededed;border-bottom:1px solid #bbb}
+.card-head h3{font-size:14px;margin:0}
+.card-mark{width:37px;height:37px;display:grid;place-items:center;background:#fff;border:1px solid #888;color:#123d85;font-weight:bold;font-size:12px;flex-shrink:0}
+.card-body{padding:10px;line-height:1.5;display:flex;flex-direction:column;align-items:flex-start;gap:9px;flex:1}
+.card-body p{margin:0}
+.card-meta{font-size:11px;color:#555}
+.card-actions{display:flex;gap:7px;flex-wrap:wrap;margin-top:auto}
+.small-button{padding:5px 8px!important;min-height:27px!important;font-size:12px}
+.statusbar{display:flex;justify-content:space-between;gap:10px;flex-wrap:wrap;border-top:1px solid #888;padding:7px 9px;font-size:11px}
+.taskbar{position:fixed;bottom:0;left:0;right:0;height:42px;background:var(--panel);border-top:2px solid #fff;display:flex;align-items:center;padding:4px 7px;gap:8px;z-index:10}
+.start-button{font-weight:bold;display:flex;align-items:center;gap:6px;padding:5px 12px!important;min-height:30px!important}
+.start-mark{width:17px;height:17px;background:linear-gradient(135deg,#ff5148 0 25%,#58b957 25% 50%,#3488e8 50% 75%,#f8d348 75%);border:1px solid #777}
+.taskbar-label{border-left:1px solid #888;padding-left:10px;flex:1;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.clock{border:2px solid;border-color:#777 #fff #fff #777;padding:6px 9px;min-width:72px;text-align:center;font-variant-numeric:tabular-nums}
+.empty{padding:25px 12px;text-align:center;color:#444;border:1px dashed #aaa;line-height:1.6}
+.hidden{display:none!important}
+.modal-backdrop{position:fixed;inset:0;background:rgba(0,0,0,.42);z-index:30;display:flex;align-items:center;justify-content:center;padding:18px}
+.modal{width:min(620px,100%);max-height:min(82vh,760px);overflow:auto;background:var(--panel);border:2px solid;border-color:#fff #555 #555 #fff;padding:3px;box-shadow:4px 4px 0 rgba(0,0,0,.25)}
+.modal .titlebar{position:sticky;top:0}
+.modal-content{padding:16px;line-height:1.65}
+.modal-content h2{font-size:18px;margin:0 0 10px}
+.modal-content p{margin:8px 0}
+.modal-content ul{padding-left:22px}
+.modal-footer{display:flex;justify-content:flex-end;gap:8px;padding:0 12px 12px}
+.modal-footer button{min-width:85px}
+.toast{position:fixed;right:12px;bottom:54px;background:#ffffe1;border:1px solid #8a824c;padding:10px 13px;z-index:40;box-shadow:2px 2px 4px var(--shadow);max-width:min(350px,calc(100vw - 24px))}
+.xp-mode{--desktop:#245edb;--panel:#ece9d8;--panel-light:#fff;--panel-dark:#7f9db9;--ink:#1b1b1b;--blue:#0054e3;--title1:#0054e3;--title2:#3a93ff;--button:#ece9d8;--window:#ece9d8;--workspace:#fff;--accent:#0054e3}
+.xp-mode .window{border-radius:7px 7px 0 0;overflow:hidden;border-color:#7aa7e8 #1e4f9a #1e4f9a #7aa7e8}
+.xp-mode .titlebar{border-radius:5px 5px 0 0;height:31px}
+.xp-mode .window-controls button{border-radius:3px;border-color:#fff #3867a6 #3867a6 #fff}
+.xp-mode .toolbar button,.xp-mode .retro-button,.xp-mode .start-button{border-radius:4px}
+.xp-mode .start-button{background:linear-gradient(#5cbf58,#168316);color:#fff;text-shadow:1px 1px #255525}
+.xp-mode .taskbar{background:linear-gradient(#3f8cf4,#1754c7);border-top-color:#74b7ff;color:#fff}
+.xp-mode .clock{border-color:#1245a3 #b6d2ff #b6d2ff #1245a3}
+.xp-mode .welcome{border-radius:4px;background:linear-gradient(110deg,#e7f1ff,#fff)}
+.xp-mode .card{border-radius:4px;overflow:hidden}
+.xp-mode .nav-item.active{border-radius:3px;background:#dcecff}
+.xp-mode .side-note{background:#fffbd7}
+.xp-mode .content,.xp-mode .sidebar{border-color:#7f9db9 #fff #fff #7f9db9}
+.xp-mode .toolbar{border-bottom-color:#9ba8ba}
+.xp-mode .menubar{border-bottom-color:#9ba8ba}
+@media(max-width:760px){
+ .desktop{padding:8px 7px 55px}.main-layout{grid-template-columns:1fr;min-height:0}
+ .sidebar{padding:9px}.nav-list{grid-template-columns:repeat(2,minmax(0,1fr))}
+ .side-note{margin-top:10px}.cards{grid-template-columns:1fr}.content{padding:10px}
+ .toolbar{align-items:stretch}.address{flex-basis:100%}.search-wrap{flex:1 1 100%}
+ .welcome h1{font-size:20px}.taskbar-label{display:none}
+}
+@media(prefers-reduced-motion:reduce){*{scroll-behavior:auto!important;transition:none!important}}
+
+/* Recursos de conta, comentários e marca d'água — extensão do arquivo original. */
+.account-button{white-space:nowrap}
+.account-state{font-size:11px;color:var(--muted);padding:3px 7px;white-space:nowrap}
+.comments-panel{margin-top:18px;border:1px solid #a3a3a3;background:#fafafa}
+.comments-heading{padding:10px;background:#ededed;border-bottom:1px solid #bbb;font-size:15px;font-weight:bold}
+.comments-inner{padding:12px}
+.comment-form{display:grid;gap:8px}
+.comment-form textarea{width:100%;min-height:82px;resize:vertical;background:#fff;border:2px solid;border-color:#555 #fff #fff #555;padding:8px;font:inherit}
+.comment-help{font-size:11px;color:#555;line-height:1.5}
+.comment-list{display:grid;gap:8px;margin-top:12px}
+.comment-item{background:#fff;border:1px solid #bbb;padding:9px;overflow-wrap:anywhere}
+.comment-meta{display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin-bottom:5px;font-size:11px;color:#555}
+.comment-author{font-weight:bold;color:var(--accent)}
+.comment-text{white-space:pre-wrap;line-height:1.5}
+.comment-actions{display:flex;gap:6px;margin-top:7px}
+.moderation-note{background:#ffffe1;border:1px solid #c8bd75;padding:8px;line-height:1.5;margin-bottom:10px}
+.watermark{text-align:center;font-size:10px;color:#555;padding:7px 5px 4px;letter-spacing:.1px}
+.login-fields{display:grid;gap:10px}
+.login-fields label{display:grid;gap:4px;font-weight:bold}
+.login-fields input{width:100%;padding:8px;background:#fff;border:2px solid;border-color:#555 #fff #fff #555;font-weight:normal}
+.login-error{color:#9b1515;font-weight:bold;min-height:1.2em}
+.community-panel{margin-top:18px;border:1px solid #a3a3a3;background:#f7f7f7}
+.community-heading{padding:10px;background:#dce8f8;border-bottom:1px solid #9ba8ba;font-weight:bold}
+.community-inner{padding:12px;display:grid;gap:14px}
+.community-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:8px}
+.community-user{display:flex;gap:9px;align-items:center;background:#fff;border:1px solid #bbb;padding:8px;min-width:0}
+.avatar-icon{width:34px;height:34px;flex:0 0 34px;border:1px solid #7f9db9;background:linear-gradient(#fff,#dce8f8);display:inline-flex;align-items:center;justify-content:center;font-size:21px;color:#174a85;font-weight:bold}
+.avatar-icon.large{width:54px;height:54px;flex-basis:54px;font-size:30px}
+.community-user-name{font-weight:bold;overflow-wrap:anywhere}
+.community-user button{margin-left:auto;flex-shrink:0}
+.profile-summary{display:flex;gap:12px;align-items:center;background:#fff;border:1px solid #b7b7b7;padding:12px;margin-bottom:12px}
+.message-list{display:grid;gap:8px;max-height:300px;overflow:auto;margin:10px 0}
+.message-item{padding:8px;border:1px solid #bbb;background:#fff;overflow-wrap:anywhere}
+.message-item.mine{border-left:4px solid #3879c6}
+.message-meta{font-size:11px;color:#555;margin-bottom:5px}
+.message-compose{display:grid;gap:8px}
+.message-compose textarea{min-height:70px;width:100%;padding:8px;font:inherit;border:2px solid;border-color:#555 #fff #fff #555}
+.profile-actions{display:flex;gap:8px;flex-wrap:wrap}.profile-bio{background:#fff;border:1px solid #bbb;padding:10px;white-space:pre-wrap;overflow-wrap:anywhere}
+@media(max-width:760px){.account-state{white-space:normal}.comment-meta{gap:5px}}
+
+.community-search{display:flex;gap:6px;flex-wrap:wrap;margin:8px 0}.community-search input,.message-compose input{flex:1;min-width:140px;border:2px solid;border-color:#777 #fff #fff #777;padding:7px;font:inherit}.social-subpanel{border:1px solid #9aaec4;background:#f4f8fc;padding:10px;margin-top:12px}.social-list{display:grid;gap:7px;margin:8px 0}.social-row{display:flex;align-items:center;gap:8px;flex-wrap:wrap;background:#fff;border:1px solid #b8c8d8;padding:8px}.social-row .social-label{flex:1;min-width:120px}.social-row small{color:#555}.group-chat{border-top:1px solid #b8c8d8;margin-top:10px;padding-top:10px}.social-actions{display:flex;gap:5px;flex-wrap:wrap}.social-subpanel h3{margin-top:4px}
+</style>
+</head>
+<body>
+<div class="desktop">
+  <section class="window" aria-label="Retro Windows Archive">
+    <header class="titlebar">
+      <div class="titlebar-name"><span class="mini-logo">RW</span><span>Retro Windows Archive — Explorador</span></div>
+      <div class="window-controls"><button id="minimizeBtn" title="Minimizar visualmente" aria-label="Minimizar visualmente">_</button><button id="maximizeBtn" title="Alternar largura" aria-label="Alternar largura">□</button><button id="closeBtn" title="Voltar à página inicial" aria-label="Voltar à página inicial">×</button></div>
+    </header>
+    <nav class="menubar" aria-label="Menu principal">
+      <button class="menu-button" data-action="home">Arquivo</button>
+      <button class="menu-button" data-action="about">Editar</button>
+      <button class="menu-button" data-action="view">Exibir</button>
+      <button class="menu-button" data-action="help">Ajuda</button>
+    </nav>
+    <div class="toolbar">
+      <button id="backBtn" title="Voltar à categoria anterior">← Voltar</button>
+      <button id="homeBtn">Início</button>
+      <div class="address"><label for="addressText">Endereço</label><input id="addressText" value="Meu Computador\\Retro Windows Archive" readonly></div>
+      <div class="search-wrap"><input id="searchInput" type="search" placeholder="Pesquisar neste arquivo..." aria-label="Pesquisar neste arquivo"><button class="retro-button" id="searchBtn">Pesquisar</button></div><button class="retro-button account-button" id="accountBtn" type="button">Entrar / Conta</button>
+    </div>
+    <div class="main-layout">
+      <aside class="sidebar">
+        <h2 class="side-heading">Pastas do arquivo</h2>
+        <nav class="nav-list" id="navList" aria-label="Categorias">
+          <button class="nav-item active" data-category="all"><span class="folder-icon"></span>Visão geral</button>
+          <button class="nav-item" data-category="win95"><span class="folder-icon"></span>Windows 95</button>
+          <button class="nav-item" data-category="winxp"><span class="folder-icon"></span>Windows XP</button>
+          <button class="nav-item" data-category="tools"><span class="folder-icon"></span>Programas e ferramentas</button>
+          <button class="nav-item" data-category="history"><span class="folder-icon"></span>História e documentos</button>
+          <button class="nav-item" data-category="favorites"><span class="folder-icon"></span>Favoritos</button>
+        </nav>
+        <div class="side-note"><strong>Dica do arquivo</strong><br>Abra um item para ver sua ficha, curiosidades e referências para pesquisar mais.</div>
+      </aside>
+      <main class="content">
+        <section class="welcome">
+          <h1>Retro Windows Archive</h1>
+          <p>Um pequeno museu interativo dedicado ao Windows 95 e ao Windows XP. Explore elementos históricos, leia as fichas e monte sua própria coleção de favoritos.</p>
+        </section>
+        <div class="content-top"><h2 id="sectionTitle">Visão geral</h2><span class="result-count" id="resultCount" aria-live="polite"></span></div>
+        <div id="cards" class="cards"></div>
+        <div id="emptyState" class="empty hidden">Nenhum item encontrado.<br>Tente outra palavra ou escolha uma pasta diferente.</div>
+        <section class="comments-panel" aria-labelledby="commentsTitle">
+          <div class="comments-heading" id="commentsTitle">Mural de comentários</div>
+          <div class="comments-inner">
+            <div class="moderation-note" id="moderationNotice">Comentários são guardados neste navegador. A moderação automática tenta bloquear ameaças, assédio e divulgação de dados pessoais, mas pode errar.</div>
+            <div id="commentAccountPrompt">Entre ou crie um perfil local para publicar um comentário.</div>
+            <form class="comment-form" id="commentForm">
+              <label for="commentText"><strong>Seu comentário</strong></label>
+              <textarea id="commentText" maxlength="600" placeholder="Escreva algo respeitoso sobre o arquivo..." aria-label="Seu comentário"></textarea>
+              <div class="comment-help">Máximo de 600 caracteres. Não publique senhas, endereços, telefones ou outros dados pessoais.</div>
+              <div><button class="retro-button" type="submit" id="postCommentBtn">Publicar comentário</button></div>
+              <div id="commentFeedback" class="login-error" aria-live="polite"></div>
+            </form>
+            <div id="commentList" class="comment-list" aria-live="polite"></div>
+          </div>
+        </section>
+        <section class="community-panel" aria-labelledby="communityTitle">
+          <div class="community-heading" id="communityTitle">Comunidade — perfis e mensagens</div>
+          <div class="community-inner">
+            <div class="moderation-note">Os perfis usam apenas ícones predefinidos; não é possível enviar fotos. Mensagens privadas também passam pelo mesmo filtro automático de segurança do mural.</div>
+            <div><h3>Pesquisar Nick</h3><div class="community-search"><input id="nickSearchInput" type="search" maxlength="20" placeholder="Digite o Nick de alguém..." aria-label="Pesquisar Nick"><button class="retro-button" type="button" id="nickSearchBtn">Pesquisar</button></div><div id="nickSearchResults" class="community-grid"></div></div>
+            <div><h3>Explorar contas</h3><div class="community-grid" id="communityUsers"></div></div>
+            <section class="social-subpanel"><h3>Amizades</h3><p class="comment-help">Envie pedidos de amizade, aceite convites recebidos e veja sua lista de amigos.</p><div id="friendRequests" class="social-list"></div><div id="friendList" class="social-list"></div></section>
+            <section class="social-subpanel"><h3>Grupos</h3><form id="createGroupForm" class="message-compose"><label for="groupName"><strong>Criar grupo</strong></label><input id="groupName" maxlength="30" placeholder="Nome do grupo" aria-label="Nome do grupo"><button class="retro-button" type="submit">Criar grupo</button><div id="groupFeedback" class="login-error" aria-live="polite"></div></form><div class="community-search"><input id="groupSearchInput" type="search" maxlength="30" placeholder="Pesquisar grupos públicos..." aria-label="Pesquisar grupos"><button class="retro-button" type="button" id="groupSearchBtn">Pesquisar grupos</button></div><div id="groupSearchResults" class="social-list"></div><h4>Meus grupos</h4><div id="groupList" class="social-list"></div><div id="groupRequests" class="social-list"></div><div class="group-chat"><label for="groupSelect"><strong>Grupo selecionado</strong></label><select id="groupSelect"><option value="">Escolha um grupo...</option></select><div id="groupMembers" class="comment-help"></div><div id="groupAdminPanel" class="social-subpanel hidden"></div><form id="groupInviteForm" class="message-compose"><label for="groupInviteUser"><strong>Adicionar amigo ao grupo</strong></label><select id="groupInviteUser"><option value="">Escolha um amigo...</option></select><button class="retro-button" type="submit">Adicionar ao grupo</button></form><div id="groupMessages" class="message-list"></div><form id="groupMessageForm" class="message-compose"><label for="groupMessageText"><strong>Mensagem do grupo</strong></label><textarea id="groupMessageText" maxlength="600" placeholder="Escreva para o grupo..." aria-label="Mensagem do grupo"></textarea><button class="retro-button" type="submit">Enviar no grupo</button></form></div></section>
+            <div><h3>Mensagens privadas</h3><div id="messagePrompt">Entre em uma conta para ver e enviar mensagens.</div><div id="messageList" class="message-list"></div>
+              <form id="messageForm" class="message-compose"><label for="messageRecipient"><strong>Enviar para</strong></label><select id="messageRecipient"><option value="">Escolha uma conta...</option></select><label for="messageText"><strong>Mensagem</strong></label><textarea id="messageText" maxlength="600" placeholder="Escreva uma mensagem respeitosa..." aria-label="Mensagem privada"></textarea><div class="comment-help">Máximo de 600 caracteres. Não envie ameaças, assédio, senhas ou dados pessoais.</div><div><button class="retro-button" type="submit" id="sendMessageBtn">Enviar mensagem</button></div><div id="messageFeedback" class="login-error" aria-live="polite"></div></form>
+            </div>
+          </div>
+        </section>
+      </main>
+    </div>
+    <footer class="statusbar"><span id="statusText" aria-live="polite">Pronto</span><span>Retro Windows Archive · Edição local</span></footer>
+    <div class="watermark">© 2026 Retro Windows Archive · Projeto independente, sem vínculo oficial com a Microsoft.</div>
+  </section>
+</div>
+<div class="taskbar">
+  <button class="retro-button start-button" id="startBtn"><span class="start-mark"></span>Iniciar</button>
+  <div class="taskbar-label" id="taskbarLabel">Retro Windows Archive</div>
+  <div class="clock" id="clock" aria-label="Relógio local">--:--</div>
+</div>
+<div id="modalHost" class="hidden"></div>
+<div id="toast" class="toast hidden" role="status"></div>
+<script>
+(() => {
+'use strict';
+
+const items = [
+ {id:'welcome95',category:'win95',title:'Windows 95',mark:'95',meta:'Sistema operacional · 1995',description:'O Windows 95 popularizou uma experiência de desktop centrada no menu Iniciar, na barra de tarefas e em janelas mais integradas.',details:'Lançado em 24 de agosto de 1995, o Windows 95 combinou elementos que se tornaram familiares a muitos usuários: menu Iniciar, barra de tarefas e área de trabalho com atalhos. Também trouxe suporte mais amplo a nomes de arquivos longos e melhorias importantes na interface.',facts:['Lançamento: 24 de agosto de 1995.','A interface ajudou a estabelecer convenções usadas por muitas versões posteriores.','O nome de código de desenvolvimento foi Chicago.'],search:'menu iniciar barra tarefas chicago interface histórico'},
+ {id:'desktop95',category:'win95',title:'Área de trabalho clássica',mark:'DESK',meta:'Interface · Windows 95',description:'A área de trabalho com fundo verde-azulado, ícones e janelas cinzentas virou um dos visuais mais reconhecíveis da computação doméstica.',details:'O visual clássico usava controles cinzentos, bordas em relevo, menus compactos e ícones pequenos. Você pode recriar essa linguagem visual em projetos próprios com CSS, sem precisar instalar o sistema antigo.',facts:['Observe os efeitos de borda em relevo.','As janelas usam uma barra de título azul.','A simplicidade visual foi pensada para computadores da época.'],search:'desktop teal cinza bordas ícones tema'},
+ {id:'paint95',category:'win95',title:'Paint e acessórios',mark:'PNT',meta:'Acessórios · Windows 95',description:'O Paint, o Bloco de Notas e a Calculadora são exemplos de ferramentas simples que acompanharam gerações de usuários.',details:'Os acessórios básicos do Windows ajudavam em tarefas cotidianas: desenhar imagens simples, escrever texto sem formatação complexa e fazer cálculos. As versões mudaram com o tempo, mas a ideia de pequenos utilitários permaneceu.',facts:['O Bloco de Notas trabalha principalmente com texto simples.','O Paint é voltado à edição básica de imagens.','A Calculadora evoluiu bastante nas versões posteriores.'],search:'paint bloco de notas calculadora acessórios'},
+ {id:'solitaire',category:'win95',title:'Paciência e jogos clássicos',mark:'CARD',meta:'Software incluído · História',description:'Os jogos que acompanhavam versões do Windows também ajudavam as pessoas a aprender a usar o mouse e a interface.',details:'O jogo Paciência já era conhecido antes do Windows 95 e tornou-se um clássico dos computadores pessoais. Jogos e acessórios integrados ajudavam a demonstrar as possibilidades do computador e ofereciam uma pausa entre tarefas.',facts:['Paciência apareceu em versões anteriores do Windows.','Jogos de cartas ajudavam a praticar arrastar e soltar.','A disponibilidade exata variava conforme a edição instalada.'],search:'paciência cartas mouse jogos clássicos'},
+ {id:'winxp',category:'winxp',title:'Windows XP',mark:'XP',meta:'Sistema operacional · 2001',description:'O Windows XP ficou conhecido pelo tema Luna, pelos tons azuis e verdes e pelo papel de parede Bliss.',details:'Lançado em 25 de outubro de 2001, o Windows XP reuniu as linhas doméstica e profissional do Windows sobre a base NT. O tema Luna trouxe controles arredondados, cores fortes e uma aparência amigável.',facts:['Lançamento: 25 de outubro de 2001.','XP deriva de “experience”.','O sistema recebeu vários Service Packs durante sua vida útil.'],search:'luna azul verde bliss service pack nt'},
+ {id:'bliss',category:'winxp',title:'Papel de parede Bliss',mark:'IMG',meta:'Imagem icônica · Windows XP',description:'A fotografia de colinas verdes sob um céu azul tornou-se uma das imagens mais associadas ao Windows XP.',details:'A imagem conhecida como Bliss foi fotografada por Charles O’Rear, na Califórnia, e usada como papel de parede padrão do Windows XP. É um exemplo marcante de como uma imagem pode ficar associada à identidade de um sistema operacional.',facts:['Fotógrafo: Charles O’Rear.','A fotografia foi feita na região vinícola da Califórnia.','O papel de parede virou uma referência cultural da era XP.'],search:'bliss fotografia charles o rear colinas papel parede'},
+ {id:'soundsxp',category:'winxp',title:'Sons do sistema',mark:'SND',meta:'Áudio · Windows XP',description:'Sons de inicialização, avisos e notificações faziam parte da identidade sonora do sistema.',details:'O Windows XP usava sons para marcar eventos como iniciar sessão, receber avisos ou esvaziar a Lixeira. Ao estudar áudio de sistemas antigos, procure fontes legítimas e respeite os direitos de uso antes de redistribuir arquivos.',facts:['Os sons eram associados a eventos do sistema.','É possível estudar a estrutura dos arquivos de áudio sem alterar o sistema atual.','Não baixe executáveis desconhecidos para obter arquivos de som.'],search:'som inicialização notificação wav áudio'},
+ {id:'explorer',category:'tools',title:'Explorador de Arquivos',mark:'EXP',meta:'Conceito de interface',description:'O explorador organiza arquivos e pastas por meio de uma hierarquia que você pode navegar.',details:'Esta página é uma demonstração inspirada em interfaces antigas, não uma cópia do Explorador original. Ela mostra como uma navegação por categorias, pesquisa e fichas de conteúdo pode funcionar em um único arquivo HTML.',facts:['Pastas agrupam itens relacionados.','A pesquisa desta página filtra títulos, descrições e palavras-chave.','O botão de favoritos guarda suas escolhas neste navegador.'],search:'explorador arquivos pastas pesquisa interface'},
+ {id:'html',category:'tools',title:'HTML, CSS e JavaScript',mark:'WEB',meta:'Tecnologias web',description:'Com essas três tecnologias você pode construir sua própria interface retrô que funciona no navegador.',details:'HTML define a estrutura e o conteúdo. CSS controla o visual, incluindo cores, bordas e disposição. JavaScript responde às interações, como pesquisa, favoritos, janelas de detalhes e alternância entre temas.',facts:['HTML estrutura o conteúdo.','CSS define aparência e layout.','JavaScript adiciona comportamento e interação.'],search:'programação html css javascript site aprender'},
+ {id:'virtual',category:'tools',title:'Máquinas virtuais e segurança',mark:'VM',meta:'Exploração segura',description:'Uma máquina virtual permite experimentar alguns sistemas antigos em um ambiente separado do sistema principal.',details:'Uma máquina virtual simula um computador dentro do computador. Ela pode ser útil para pesquisa histórica, mas exige uma imagem de sistema obtida legalmente e configuração cuidadosa. Sistemas antigos podem ter vulnerabilidades; evite conectá-los à internet e nunca execute arquivos desconhecidos.',facts:['Faça isso com ajuda de um adulto responsável, se necessário.','Use imagens de instalação obtidas legalmente.','Mantenha sistemas antigos isolados da rede e dos seus arquivos pessoais.'],search:'virtualização máquina virtual segurança sistema antigo'},
+ {id:'timeline',category:'history',title:'Linha do tempo: 1995–2001',mark:'TIME',meta:'Cronologia',description:'Seis anos separam o lançamento do Windows 95 e do Windows XP, período de grandes mudanças nos computadores pessoais.',details:'Em 1995, o Windows 95 apresentou uma interface que influenciou a experiência de desktop por muitos anos. Em 1998, o Windows 98 refinou essa linha. Em 2000, chegaram Windows 2000 e Windows Me. Em 2001, o Windows XP reuniu a linha doméstica e profissional na base NT.',facts:['1995 — Windows 95.','1998 — Windows 98.','2000 — Windows 2000 e Windows Me.','2001 — Windows XP.'],search:'linha do tempo 1995 1998 2000 2001 versões'},
+ {id:'glossary',category:'history',title:'Glossário retrô',mark:'ABC',meta:'Guia de termos',description:'Um pequeno dicionário para entender expressões comuns em manuais e interfaces antigas.',details:'Desktop é a área de trabalho. Atalho é um link para abrir um item sem duplicá-lo. Barra de tarefas reúne botões de janelas abertas e acesso ao menu Iniciar em versões clássicas. Driver é um software que permite ao sistema se comunicar com um dispositivo.',facts:['Desktop: área de trabalho.','Atalho: referência para abrir um item.','Driver: software de comunicação com hardware.','Sistema operacional: software que administra o computador.'],search:'glossário desktop atalho barra tarefas driver sistema operacional'}
+];
+
+const categoryNames = {
+ all:'Visão geral',win95:'Windows 95',winxp:'Windows XP',
+ tools:'Programas e ferramentas',history:'História e documentos',favorites:'Favoritos'
+};
+const cards = document.getElementById('cards');
+const emptyState = document.getElementById('emptyState');
+const sectionTitle = document.getElementById('sectionTitle');
+const resultCount = document.getElementById('resultCount');
+const statusText = document.getElementById('statusText');
+const addressText = document.getElementById('addressText');
+const searchInput = document.getElementById('searchInput');
+const modalHost = document.getElementById('modalHost');
+const toast = document.getElementById('toast');
+let currentCategory = 'all';
+let previousCategory = 'all';
+let query = '';
+let toastTimer = null;
+let isMaximized = false;
+let isMinimized = false;
+
+function readFavorites(){
+  try {
+    const saved = JSON.parse(localStorage.getItem('retroWindowsArchiveFavorites') || '[]');
+    return Array.isArray(saved) ? saved.filter(id => items.some(item => item.id === id)) : [];
+  } catch (_) { return []; }
+}
+let favorites = readFavorites();
+function saveFavorites(){
+  try { localStorage.setItem('retroWindowsArchiveFavorites', JSON.stringify(favorites)); }
+  catch (_) { showToast('O navegador não permitiu salvar favoritos. Eles continuarão disponíveis enquanto esta página estiver aberta.'); }
+}
+function showToast(message){
+  toast.textContent = message;
+  toast.classList.remove('hidden');
+  if(toastTimer) clearTimeout(toastTimer);
+  toastTimer = setTimeout(() => toast.classList.add('hidden'), 3200);
+}
+function safeText(value){ return String(value).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])); }
+function visibleItems(){
+  let list = items.filter(item => currentCategory === 'all' || item.category === currentCategory || (currentCategory === 'favorites' && favorites.includes(item.id)));
+  const q = query.trim().toLocaleLowerCase('pt-BR');
+  if(q) list = list.filter(item => [item.title,item.meta,item.description,item.details,item.search,item.category].join(' ').toLocaleLowerCase('pt-BR').includes(q));
+  return list;
+}
+function render(){
+  sectionTitle.textContent = categoryNames[currentCategory] || 'Visão geral';
+  addressText.value = 'Meu Computador\\Retro Windows Archive\\' + (categoryNames[currentCategory] || 'Visão geral');
+  document.querySelectorAll('.nav-item').forEach(button => {
+    const active = button.dataset.category === currentCategory;
+    button.classList.toggle('active', active);
+    if(active) button.setAttribute('aria-current','page'); else button.removeAttribute('aria-current');
+  });
+  const list = visibleItems();
+  resultCount.textContent = `${list.length} ${list.length === 1 ? 'item' : 'itens'}`;
+  cards.replaceChildren();
+  emptyState.classList.toggle('hidden', list.length !== 0);
+  list.forEach(item => {
+    const article = document.createElement('article');
+    article.className = 'card';
+    const isFav = favorites.includes(item.id);
+    article.innerHTML = `
+      <div class="card-head"><div class="card-mark" aria-hidden="true">${safeText(item.mark)}</div><div><h3>${safeText(item.title)}</h3><div class="card-meta">${safeText(item.meta)}</div></div></div>
+      <div class="card-body"><p>${safeText(item.description)}</p><div class="card-actions"><button class="retro-button small-button" data-open="${safeText(item.id)}">Abrir ficha</button><button class="retro-button small-button" data-fav="${safeText(item.id)}" aria-pressed="${isFav}">${isFav ? '★ Favorito' : '☆ Favoritar'}</button></div></div>`;
+    cards.appendChild(article);
+  });
+  statusText.textContent = query ? `Pesquisa: "${query}"` : 'Pronto';
+  document.getElementById('taskbarLabel').textContent = 'Retro Windows Archive — ' + (categoryNames[currentCategory] || 'Visão geral');
+}
+function chooseCategory(category){
+  if(!categoryNames[category]) return;
+  previousCategory = currentCategory;
+  currentCategory = category;
+  query = '';
+  searchInput.value = '';
+  isMinimized = false;
+  document.querySelector('.window').classList.remove('hidden');
+  render();
+}
+function openItem(id){
+  const item = items.find(entry => entry.id === id);
+  if(!item) return;
+  modalHost.innerHTML = `
+    <div class="modal-backdrop" data-backdrop>
+      <section class="modal" role="dialog" aria-modal="true" aria-labelledby="modalTitle">
+        <header class="titlebar"><div class="titlebar-name"><span class="mini-logo">${safeText(item.mark.slice(0,2))}</span><span>${safeText(item.title)} — Propriedades</span></div><div class="window-controls"><button data-close aria-label="Fechar">×</button></div></header>
+        <div class="modal-content"><h2 id="modalTitle">${safeText(item.title)}</h2><p><strong>${safeText(item.meta)}</strong></p><p>${safeText(item.details)}</p><h3>Informações rápidas</h3><ul>${item.facts.map(fact => `<li>${safeText(fact)}</li>`).join('')}</ul><p><strong>Para continuar:</strong> pesquise o título ou os termos desta ficha em fontes históricas confiáveis, como documentação da Microsoft, museus de informática e arquivos de software reconhecidos.</p></div>
+        <div class="modal-footer"><button class="retro-button" data-fav="${safeText(item.id)}">${favorites.includes(item.id) ? 'Remover favorito' : 'Adicionar favorito'}</button><button class="retro-button" data-close>Fechar</button></div>
+      </section>
+    </div>`;
+  modalHost.classList.remove('hidden');
+  const closeButton = modalHost.querySelector('[data-close]');
+  if(closeButton) closeButton.focus();
+}
+function closeModal(){modalHost.classList.add('hidden');modalHost.replaceChildren();}
+function toggleFavorite(id){
+  if(!items.some(item => item.id === id)) return;
+  if(favorites.includes(id)){
+    favorites = favorites.filter(value => value !== id);
+    showToast('Item removido dos favoritos.');
+  } else {
+    favorites.push(id);
+    showToast('Item adicionado aos favoritos.');
+  }
+  saveFavorites();
+  render();
+  if(!modalHost.classList.contains('hidden')) openItem(id);
+}
+function runSearch(){
+  query = searchInput.value.trim();
+  currentCategory = 'all';
+  document.querySelectorAll('.nav-item').forEach(button => button.classList.toggle('active', button.dataset.category === 'all'));
+  render();
+  if(query && visibleItems().length === 0) showToast('Não encontrei resultados. Tente palavras como “Bliss”, “Paint” ou “HTML”.');
+}
+document.getElementById('navList').addEventListener('click', event => {
+  const button = event.target.closest('[data-category]');
+  if(button) chooseCategory(button.dataset.category);
+});
+cards.addEventListener('click', event => {
+  const open = event.target.closest('[data-open]');
+  const fav = event.target.closest('[data-fav]');
+  if(open) openItem(open.dataset.open);
+  if(fav) toggleFavorite(fav.dataset.fav);
+});
+modalHost.addEventListener('click', event => {
+  if(event.target.closest('[data-close]') || event.target.matches('[data-backdrop]')) closeModal();
+  const fav = event.target.closest('[data-fav]');
+  if(fav) toggleFavorite(fav.dataset.fav);
+});
+document.addEventListener('keydown', event => {
+  if(event.key === 'Escape' && !modalHost.classList.contains('hidden')) closeModal();
+  if((event.ctrlKey || event.metaKey) && event.key.toLowerCase() === 'f'){
+    event.preventDefault();searchInput.focus();searchInput.select();
+  }
+});
+document.getElementById('searchBtn').addEventListener('click', runSearch);
+searchInput.addEventListener('keydown', event => {if(event.key === 'Enter') runSearch();});
+document.getElementById('backBtn').addEventListener('click', () => chooseCategory(previousCategory));
+document.getElementById('homeBtn').addEventListener('click', () => chooseCategory('all'));
+document.getElementById('closeBtn').addEventListener('click', () => {chooseCategory('all');showToast('Você voltou à página inicial do arquivo.');});
+document.getElementById('minimizeBtn').addEventListener('click', () => {
+  isMinimized = !isMinimized;
+  document.querySelector('.window').classList.toggle('hidden', isMinimized);
+  showToast(isMinimized ? 'Janela minimizada. Use Iniciar para restaurá-la.' : 'Janela restaurada.');
+});
+document.getElementById('maximizeBtn').addEventListener('click', () => {
+  isMaximized = !isMaximized;
+  const win = document.querySelector('.window');
+  win.style.width = isMaximized ? '100%' : '';
+  document.querySelector('.desktop').style.paddingLeft = isMaximized ? '0' : '';
+  document.querySelector('.desktop').style.paddingRight = isMaximized ? '0' : '';
+  showToast(isMaximized ? 'Largura expandida.' : 'Tamanho restaurado.');
+});
+document.getElementById('startBtn').addEventListener('click', () => {
+  isMinimized = false;
+  document.querySelector('.window').classList.remove('hidden');
+  showToast('Retro Windows Archive está aberto.');
+});
+document.querySelectorAll('[data-action]').forEach(button => button.addEventListener('click', () => {
+  const action = button.dataset.action;
+  if(action === 'home') chooseCategory('all');
+  else if(action === 'about') showInfo('Sobre o projeto','Este é um projeto educativo independente inspirado em interfaces históricas. Não é um produto oficial da Microsoft e não instala nem modifica o sistema operacional.');
+  else if(action === 'view') {
+    document.body.classList.toggle('xp-mode');
+    const mode = document.body.classList.contains('xp-mode') ? 'Windows XP' : 'Windows 95';
+    showToast('Tema alterado para ' + mode + '.');
+  } else if(action === 'help') showInfo('Ajuda','Use as pastas à esquerda para navegar. Abra “Ficha” para ler detalhes, use “Favoritar” para guardar itens e a barra de pesquisa para encontrar termos. Ctrl+F leva o cursor à pesquisa. O seletor Exibir alterna entre os temas inspirados no Windows 95 e XP.');
+}));
+function showInfo(title, body){
+  modalHost.innerHTML = `<div class="modal-backdrop" data-backdrop><section class="modal" role="dialog" aria-modal="true" aria-labelledby="infoTitle"><header class="titlebar"><div class="titlebar-name"><span class="mini-logo">RW</span><span>${safeText(title)}</span></div><div class="window-controls"><button data-close aria-label="Fechar">×</button></div></header><div class="modal-content"><h2 id="infoTitle">${safeText(title)}</h2><p>${safeText(body)}</p></div><div class="modal-footer"><button class="retro-button" data-close>OK</button></div></section></div>`;
+  modalHost.classList.remove('hidden');
+}
+function updateClock(){
+  const now = new Date();
+  document.getElementById('clock').textContent = now.toLocaleTimeString('pt-BR',{hour:'2-digit',minute:'2-digit'});
+}
+updateClock();
+setInterval(updateClock, 30000);
+render();
+})();
+</script>
+
+<style>
+/* Recursos adicionais; as regras visuais originais permanecem intactas. */
+.menu-popup{position:fixed;z-index:50;min-width:235px;background:var(--panel);border:2px solid;border-color:#fff #555 #555 #fff;padding:3px;box-shadow:3px 3px 0 rgba(0,0,0,.22)}
+.menu-popup button{display:block;width:100%;text-align:left;background:transparent;border:1px solid transparent;padding:7px 10px;color:var(--ink)}
+.menu-popup button:hover,.menu-popup button:focus-visible{background:var(--blue);color:#fff}
+.menu-popup .menu-separator{height:1px;background:#888;border-bottom:1px solid #fff;margin:3px 2px}
+</style>
+<script>
+(() => {
+'use strict';
+let retroSoundOn = true, retroAudio = null;
+function audio(){
+  const C=window.AudioContext||window.webkitAudioContext;
+  if(!C)return null;
+  if(!retroAudio)retroAudio=new C();
+  if(retroAudio.state==='suspended')retroAudio.resume().catch(()=>{});
+  return retroAudio;
+}
+function beep(freq,delay,duration,type='square',volume=.025,endFreq){
+  if(!retroSoundOn)return;
+  const c=audio();if(!c)return;
+  const o=c.createOscillator(),g=c.createGain(),t=c.currentTime+delay;
+  o.type=type;o.frequency.setValueAtTime(freq,t);
+  if(endFreq)o.frequency.exponentialRampToValueAtTime(endFreq,t+duration);
+  g.gain.setValueAtTime(.0001,t);g.gain.exponentialRampToValueAtTime(volume,t+.01);
+  g.gain.exponentialRampToValueAtTime(.0001,t+duration);
+  o.connect(g);g.connect(c.destination);o.start(t);o.stop(t+duration+.02);
+}
+function sound(kind){
+ if(!retroSoundOn)return;
+ if(kind==='startup'){beep(523,0,.18,'sine',.05);beep(659,.16,.2,'sine',.05);beep(784,.34,.32,'sine',.05);}
+ else if(kind==='open'){beep(660,0,.06,'square',.02);beep(880,.06,.09,'square',.02);}
+ else if(kind==='close'){beep(740,0,.06,'square',.02);beep(500,.07,.12,'square',.02);}
+ else if(kind==='notify'){beep(880,0,.08,'sine',.035);beep(1175,.1,.12,'sine',.035);}
+ else if(kind==='error'){beep(240,0,.15,'square',.035,160);beep(180,.16,.18,'square',.03,125);}
+ else beep(720,0,.035,'square',.012);
+}
+function toastMsg(s){
+ const t=document.getElementById('toast');if(!t)return;
+ t.textContent=s;t.classList.remove('hidden');
+}
+function closePopup(){document.getElementById('retroExtraMenu')?.remove();}
+function info(title,body){
+ const host=document.getElementById('modalHost');
+ host.innerHTML='<div class="modal-backdrop" data-extra-backdrop><section class="modal" role="dialog" aria-modal="true"><header class="titlebar"><div class="titlebar-name"><span class="mini-logo">RW</span><span>'+title+'</span></div><div class="window-controls"><button data-extra-close aria-label="Fechar">×</button></div></header><div class="modal-content"><h2>'+title+'</h2><p>'+body+'</p></div><div class="modal-footer"><button class="retro-button" data-extra-close>OK</button></div></section></div>';
+ host.classList.remove('hidden');sound('open');
+}
+function command(cmd){
+ closePopup();
+ const search=document.getElementById('searchInput');
+ if(cmd==='sound'){retroSoundOn=!retroSoundOn;toastMsg('Efeitos sonoros '+(retroSoundOn?'ativados.':'desativados.'));if(retroSoundOn)sound('notify');}
+ if(cmd==='startup'){sound('startup');toastMsg('Som de inicialização reproduzido.');}
+ if(cmd==='notify'){sound('notify');toastMsg('Som de notificação reproduzido.');}
+ if(cmd==='error'){sound('error');toastMsg('Som de erro reproduzido.');}
+ if(cmd==='refresh'){document.getElementById('homeBtn').click();sound('notify');toastMsg('Arquivo atualizado.');}
+ if(cmd==='clear'){search.value='';search.dispatchEvent(new KeyboardEvent('keydown',{key:'Enter',bubbles:true}));toastMsg('Campo de pesquisa limpo.');}
+ if(cmd==='favorites'){document.querySelector('[data-category="favorites"]')?.click();}
+ if(cmd==='about')info('Sobre o projeto','Projeto educativo independente inspirado em interfaces históricas. Não é um produto oficial da Microsoft e não altera o sistema operacional.');
+ if(cmd==='help')info('Ajuda e atalhos','Clique uma vez para navegar e duas vezes num cartão para abrir a ficha. Use Ctrl+F para focar a pesquisa, Enter para pesquisar e Esc para fechar. Clique com o botão direito num cartão para ver ações rápidas. Os sons são sintetizados localmente pelo navegador.');
+ if(cmd==='shortcuts')info('Atalhos do teclado','Ctrl+F: pesquisar. Enter: executar pesquisa. Esc: fechar ficha ou menu. Tab e Shift+Tab: navegar pelos controles.');
+ if(cmd==='theme'){document.body.classList.toggle('xp-mode');toastMsg('Tema alternado.');sound('click');}
+ if(cmd==='minimize')document.getElementById('minimizeBtn').click();
+}
+function popup(button,action){
+ closePopup();
+ const box=document.createElement('div');box.id='retroExtraMenu';box.className='menu-popup';
+ const r=button.getBoundingClientRect();box.style.left=Math.max(4,Math.min(r.left,innerWidth-245))+'px';box.style.top=Math.min(r.bottom+2,innerHeight-240)+'px';
+ const options={
+ home:[['Abrir página inicial','refresh'],['Minimizar janela','minimize']],
+ about:[['Limpar pesquisa','clear'],['Mostrar favoritos','favorites'],['','sep'],['Sobre o projeto','about']],
+ view:[['Alternar tema Windows 95 / XP','theme'],['Efeitos sonoros: '+(retroSoundOn?'ligados':'desligados'),'sound'],['','sep'],['Tocar som de inicialização','startup'],['Tocar notificação','notify'],['Tocar som de erro','error']],
+ help:[['Ajuda e instruções','help'],['Atalhos do teclado','shortcuts'],['','sep'],['Sobre o projeto','about']]
+ };
+ (options[action]||options.home).forEach(([label,cmd])=>{
+  if(cmd==='sep'){const s=document.createElement('div');s.className='menu-separator';box.appendChild(s);return;}
+  const b=document.createElement('button');b.type='button';b.textContent=label;b.addEventListener('click',()=>command(cmd));box.appendChild(b);
+ });
+ document.body.appendChild(box);box.querySelector('button')?.focus();sound('click');
+}
+document.addEventListener('click',e=>{
+ const menuButton=e.target.closest('[data-action]');
+ if(menuButton){
+  e.preventDefault();e.stopImmediatePropagation();
+  const old=document.getElementById('retroExtraMenu');
+  if(old && old.dataset.owner===menuButton.dataset.action){closePopup();return;}
+  popup(menuButton,menuButton.dataset.action);
+  const m=document.getElementById('retroExtraMenu');if(m)m.dataset.owner=menuButton.dataset.action;
+  return;
+ }
+ if(!e.target.closest('#retroExtraMenu'))closePopup();
+ if(e.target.closest('[data-open]'))sound('open');
+ else if(e.target.closest('[data-fav]'))sound('notify');
+ else if(e.target.closest('#backBtn,#homeBtn,#startBtn,#maximizeBtn,#minimizeBtn'))sound('click');
+ if(e.target.closest('#closeBtn'))sound('close');
+},true);
+document.addEventListener('dblclick',e=>{
+ const card=e.target.closest('.card');if(!card)return;
+ const b=card.querySelector('[data-open]');if(b)b.click();
+});
+document.addEventListener('contextmenu',e=>{
+ const card=e.target.closest('.card');if(!card)return;
+ e.preventDefault();closePopup();
+ const open=card.querySelector('[data-open]'),fav=card.querySelector('[data-fav]');
+ if(!open)return;
+ const box=document.createElement('div');box.id='retroExtraMenu';box.className='menu-popup';
+ box.style.left=Math.max(4,Math.min(e.clientX,innerWidth-245))+'px';box.style.top=Math.max(4,Math.min(e.clientY,innerHeight-100))+'px';
+ [['Abrir ficha',()=>open.click()],[(fav?.getAttribute('aria-pressed')==='true'?'Remover favorito':'Adicionar favorito'),()=>fav?.click()]].forEach(([label,fn])=>{const b=document.createElement('button');b.textContent=label;b.onclick=()=>{closePopup();fn();};box.appendChild(b);});
+ document.body.appendChild(box);sound('click');
+});
+document.addEventListener('keydown',e=>{
+ if(e.key==='Escape')closePopup();
+ if((e.ctrlKey||e.metaKey)&&e.key.toLowerCase()==='f'){e.preventDefault();document.getElementById('searchInput')?.focus();}
+});
+document.addEventListener('click',e=>{
+ if(e.target.closest('[data-extra-close]')||e.target.matches('[data-extra-backdrop]')){
+  document.getElementById('modalHost').classList.add('hidden');document.getElementById('modalHost').replaceChildren();sound('close');
+ }
+});
+})();
+</script>
+
+
+<script>
+(() => {
+'use strict';
+const ACCOUNT_KEY='rwa_accounts_v1';
+const SESSION_KEY='rwa_session_v1';
+const COMMENTS_KEY='rwa_comments_v1';
+const MOD_KEY='rwa_moderation_v1';
+const $=id=>document.getElementById(id);
+let activeUser=null;
+function read(key,fallback){try{const value=JSON.parse(localStorage.getItem(key)||'null');return value===null?fallback:value;}catch(_){return fallback;}}
+function write(key,value){try{localStorage.setItem(key,JSON.stringify(value));return true;}catch(_){return false;}}
+function normalizeName(name){return name.trim();} // Nicknames diferenciam maiúsculas e minúsculas.
+function validName(name){return /^[\p{L}\p{N}_-]{3,20}$/u.test(name);}
+async function hashPassword(password){
+  if(!window.crypto || !crypto.subtle) throw new Error('Este navegador não oferece o recurso de proteção necessário. Abra o arquivo em um navegador atualizado.');
+  const bytes=new TextEncoder().encode(password);
+  const digest=await crypto.subtle.digest('SHA-256',bytes);
+  return Array.from(new Uint8Array(digest)).map(b=>b.toString(16).padStart(2,'0')).join('');
+}
+function feedback(message,isError=true){
+  const el=$('commentFeedback');if(el){el.textContent=message;el.style.color=isError?'#9b1515':'#176b25';}
+}
+function openAccountDialog(){
+  const host=$('modalHost');
+  host.innerHTML=`<div class="modal-backdrop" data-account-backdrop><section class="modal" role="dialog" aria-modal="true" aria-labelledby="accountDialogTitle">
+    <header class="titlebar"><div class="titlebar-name"><span class="mini-logo">RW</span><span>Conta local — Retro Windows Archive</span></div><div class="window-controls"><button type="button" data-account-close aria-label="Fechar">×</button></div></header>
+    <div class="modal-content"><h2 id="accountDialogTitle">${activeUser?'Sua conta':'Entrar ou criar conta'}</h2>
+    <p>O perfil fica guardado neste navegador para não precisar de entrar de novo. Este é um protótipo local, não uma conta online.</p>
+    <div class="login-fields">
+      <label>Nome de usuário <input id="accountName" autocomplete="username" minlength="3" maxlength="20" placeholder="Ex.: RetroFan"></label>
+      <label>Senha <input id="accountPassword" type="password" autocomplete="current-password" minlength="8" maxlength="128" placeholder="Pelo menos 8 caracteres"></label>
+      <label>Ícone do perfil <select id="accountAvatar"><option value="◆">◆ Diamante</option><option value="●">● Círculo</option><option value="■">■ Quadrado</option><option value="▲">▲ Triângulo</option><option value="✦">✦ Estrela</option><option value="✚">✚ Cruz</option><option value="◉">◉ Alvo</option><option value="⌘">⌘ Comando</option><option value="▣">▣ Janela</option><option value="☼">☼ Sol</option></select></label>
+      <div class="comment-help">Nome único neste navegador, diferenciando maiúsculas e minúsculas: RetroFan, retrofan e RETROFAN são nomes diferentes. Use de 3 a 20 letras, números, _ ou -. Use uma senha que você não usa em outros sites.</div>
+      <div id="accountError" class="login-error" aria-live="polite"></div>
+      <div style="display:flex;gap:8px;flex-wrap:wrap"><button class="retro-button" type="button" id="loginBtn">Entrar</button><button class="retro-button" type="button" id="registerBtn">Criar conta</button>${activeUser?'<button class="retro-button" type="button" id="editProfileBtn">Editar perfil</button><button class="retro-button" type="button" id="logoutBtn">Sair da conta</button>':''}</div>
+    </div></div>
+    <div class="modal-footer"><button class="retro-button" type="button" data-account-close>Fechar</button></div>
+  </section></div>`;
+  host.classList.remove('hidden');
+  $('accountName').value=activeUser?.name||'';
+  $('accountAvatar').value=activeUser?.avatar||'◆';
+  $('accountName').focus();
+  $('loginBtn').addEventListener('click',()=>accountAction('login'));
+  $('registerBtn').addEventListener('click',()=>accountAction('register'));
+  $('logoutBtn')?.addEventListener('click',logout);
+  $('editProfileBtn')?.addEventListener('click',openEditProfile);
+}
+function openEditProfile(){
+ if(!activeUser)return;
+ const account=readAccounts().find(a=>a.normalized===activeUser.normalized);if(!account)return;
+ const host=$('modalHost');host.innerHTML=`<div class="modal-backdrop" data-profile-edit-backdrop><section class="modal" role="dialog" aria-modal="true" aria-labelledby="editProfileTitle"><header class="titlebar"><div class="titlebar-name"><span class="mini-logo">RW</span><span>Personalizar perfil</span></div><div class="window-controls"><button type="button" data-account-close aria-label="Fechar">×</button></div></header><div class="modal-content"><h2 id="editProfileTitle">Editar meu perfil</h2><p>Escolha um ícone e escreva uma pequena descrição. Não é necessário enviar uma foto.</p><div class="login-fields"><label>Ícone do perfil<select id="editAvatar">${AVATARS.map(a=>`<option value="${a}">${a}</option>`).join('')}</select></label><label>Sobre mim<textarea id="editBio" maxlength="180" placeholder="Conte um pouco sobre você..." style="min-height:85px;width:100%;padding:8px;font:inherit"></textarea></label><div id="editProfileError" class="login-error" aria-live="polite"></div><div class="profile-actions"><button class="retro-button" type="button" id="saveProfileBtn">Salvar perfil</button><button class="retro-button" type="button" data-account-close>Cancelar</button></div></div></div></section></div>`;
+ host.classList.remove('hidden');$('editAvatar').value=account.avatar||'◆';$('editBio').value=account.bio||'';$('saveProfileBtn').addEventListener('click',saveEditedProfile);
+}
+function saveEditedProfile(){
+ if(!activeUser)return;const accounts=readAccounts(),account=accounts.find(a=>a.normalized===activeUser.normalized);if(!account)return;account.avatar=$('editAvatar').value||'◆';account.bio=$('editBio').value.trim();if(!write(ACCOUNT_KEY,accounts)){$('editProfileError').textContent='Não foi possível salvar as alterações neste navegador.';return;}activeUser.avatar=account.avatar;activeUser.bio=account.bio;updateAccountUI();renderCommunity();renderSocial();renderGroupChat();closeAccountDialog();toastAccount('Perfil atualizado com sucesso.');
+}
+
+function closeAccountDialog(){const host=$('modalHost');host.classList.add('hidden');host.replaceChildren();}
+async function accountAction(action){
+  const name=$('accountName').value.trim(), password=$('accountPassword').value;
+  const error=$('accountError');error.textContent='';
+  if(!validName(name)){error.textContent='Use de 3 a 20 caracteres: letras, números, _ ou -.';return;}
+  if(password.length<8){error.textContent='A senha precisa ter pelo menos 8 caracteres.';return;}
+  try{
+    const accounts=read(ACCOUNT_KEY,[]);
+    const normalized=normalizeName(name);
+    const index=accounts.findIndex(a=>a.normalized===normalized);
+    const digest=await hashPassword(password);
+    if(action==='register'){
+      if(index!==-1){error.textContent='Esse nome já está em uso neste navegador. Escolha outro.';return;}
+      accounts.push({name,normalized,passwordHash:digest,createdAt:Date.now(),avatar:$('accountAvatar').value||'◆'});
+      if(!write(ACCOUNT_KEY,accounts)){error.textContent='Não foi possível salvar a conta neste navegador.';return;}
+      loginAs({name,normalized});closeAccountDialog();toastAccount('Conta criada. Você continuará conectado neste navegador.');return;
+    }
+    if(index===-1||accounts[index].passwordHash!==digest){error.textContent='Nome de usuário ou senha incorretos.';return;}
+    loginAs(accounts[index]);closeAccountDialog();toastAccount('Login realizado. Sua sessão será lembrada neste navegador.');
+  }catch(e){error.textContent=e.message||'Não foi possível concluir a operação.';}
+}
+function migrateCaseSensitiveNames(){
+  // Migra os perfis criados pela versão anterior, que ignorava maiúsculas/minúsculas.
+  const accounts=read(ACCOUNT_KEY,[]);
+  if(!Array.isArray(accounts)||!accounts.length)return;
+  const oldToNew={};
+  for(const account of accounts){
+    const old=String(account.normalized||normalizeName(account.name||''));
+    const exact=String(account.name||'').trim();
+    if(exact){oldToNew[old]=exact;account.normalized=exact;}
+  }
+  write(ACCOUNT_KEY,accounts);
+  const session=read(SESSION_KEY,null);
+  if(session?.normalized && oldToNew[session.normalized]){
+    session.normalized=oldToNew[session.normalized];write(SESSION_KEY,session);
+  }
+  const security=read(SECURITY_KEY,{});
+  for(const [oldKey,newKey] of Object.entries(oldToNew))if(oldKey!==newKey&&Object.prototype.hasOwnProperty.call(security,oldKey)){
+    if(!Object.prototype.hasOwnProperty.call(security,newKey))security[newKey]=security[oldKey];delete security[oldKey];
+  }
+  write(SECURITY_KEY,security);
+  const rates=read(RATE_KEY,{});
+  for(const [oldKey,newKey] of Object.entries(oldToNew))if(oldKey!==newKey&&Object.prototype.hasOwnProperty.call(rates,oldKey)){
+    if(!Object.prototype.hasOwnProperty.call(rates,newKey))rates[newKey]=rates[oldKey];delete rates[oldKey];
+  }
+  write(RATE_KEY,rates);
+  const moderation=read(MOD_KEY,{});
+  for(const [oldKey,newKey] of Object.entries(oldToNew))if(oldKey!==newKey){
+    for(const suffix of ['', '_strikes']){const from=oldKey+suffix,to=newKey+suffix;if(Object.prototype.hasOwnProperty.call(moderation,from)){if(!Object.prototype.hasOwnProperty.call(moderation,to))moderation[to]=moderation[from];delete moderation[from];}}
+  }
+  write(MOD_KEY,moderation);
+  const comments=read(COMMENTS_KEY,[]);
+  if(Array.isArray(comments)){for(const comment of comments){const exact=oldToNew[comment.authorNormalized];if(exact)comment.authorNormalized=exact;}write(COMMENTS_KEY,comments);}
+}
+function loginAs(account){activeUser={name:account.name,normalized:account.normalized,avatar:account.avatar||'◆'};write(SESSION_KEY,{normalized:activeUser.normalized});updateAccountUI();renderComments();renderCommunity();renderMessages();renderSocial();}
+function logout(){if(activeUser && isSuspended(getAccountSecurity(activeUser.normalized).record)){ensureSecurityScreen();return;}activeUser=null;try{localStorage.removeItem(SESSION_KEY);}catch(_){}closeAccountDialog();updateAccountUI();renderComments();renderCommunity();renderMessages();toastAccount('Você saiu da conta.');}
+function toastAccount(message){const t=$('toast');if(!t)return;t.textContent=message;t.classList.remove('hidden');}
+function updateAccountUI(){
+ const b=$('accountBtn');if(b)b.textContent=activeUser?'Conta: '+activeUser.name:'Entrar / Conta';
+ const prompt=$('commentAccountPrompt');if(prompt)prompt.textContent=activeUser?'Conectado como '+activeUser.name+'. Você pode publicar um comentário.':'Entre ou crie um perfil local para publicar um comentário.';
+ const form=$('commentForm');if(form)form.querySelector('textarea').disabled=!activeUser;
+ const post=$('postCommentBtn');if(post)post.disabled=!activeUser;
+}
+function readComments(){const list=read(COMMENTS_KEY,[]);return Array.isArray(list)?list:[];}
+function renderComments(){
+ const host=$('commentList');if(!host)return;
+ host.replaceChildren();
+ const comments=readComments().slice(-100).reverse();
+ if(!comments.length){const empty=document.createElement('div');empty.className='empty';empty.textContent='Ainda não há comentários. Você pode inaugurar o mural.';host.appendChild(empty);return;}
+ comments.forEach(comment=>{
+  const item=document.createElement('article');item.className='comment-item';
+  const meta=document.createElement('div');meta.className='comment-meta';
+  const author=document.createElement('button');author.type='button';author.className='comment-author retro-button small-button';author.textContent=comment.author;author.title='Ver perfil de '+comment.author;author.addEventListener('click',()=>openProfile(comment.authorNormalized));
+  const date=document.createElement('time');date.textContent=new Date(comment.createdAt).toLocaleString('pt-BR');
+  meta.append(author,date);item.appendChild(meta);
+  const body=document.createElement('div');body.className='comment-text';body.textContent=comment.text;item.appendChild(body);
+  if(activeUser && comment.authorNormalized===activeUser.normalized){
+   const actions=document.createElement('div');actions.className='comment-actions';
+   const remove=document.createElement('button');remove.type='button';remove.className='retro-button small-button';remove.textContent='Apagar meu comentário';
+   remove.addEventListener('click',()=>{const updated=readComments().filter(c=>c.id!==comment.id);write(COMMENTS_KEY,updated);renderComments();feedback('Seu comentário foi apagado.',false);});
+   actions.appendChild(remove);item.appendChild(actions);
+  }
+  host.appendChild(item);
+ });
+}
+const MESSAGES_KEY='rwa_private_messages_v1';
+const AVATARS=['◆','●','■','▲','✦','✚','◉','⌘','▣','☼'];
+function readAccounts(){const a=read(ACCOUNT_KEY,[]);return Array.isArray(a)?a:[];}
+function messageFeedback(message,isError=true){const el=$('messageFeedback');if(el){el.textContent=message;el.style.color=isError?'#9b1515':'#176b25';}}
+function safeEl(tag,cls,text){const el=document.createElement(tag);if(cls)el.className=cls;if(text!==undefined)el.textContent=text;return el;}
+function openProfile(normalized){
+ const account=readAccounts().find(a=>a.normalized===normalized);if(!account){toastAccount('Esse perfil não está disponível neste navegador.');return;}
+ const comments=readComments().filter(c=>c.authorNormalized===normalized);
+ const messages=read(MESSAGES_KEY,[]).filter(m=>m.from===normalized||m.to===normalized);
+ const host=$('modalHost');host.innerHTML='';
+ const backdrop=safeEl('div','modal-backdrop');backdrop.dataset.profileBackdrop='1';
+ const modal=safeEl('section','modal');modal.setAttribute('role','dialog');modal.setAttribute('aria-modal','true');
+ const header=safeEl('header','titlebar');const title=safeEl('div','titlebar-name');title.append(safeEl('span','mini-logo','RW'),safeEl('span','','Perfil da comunidade'));header.append(title);const close=safeEl('button','','×');close.type='button';close.addEventListener('click',closeAccountDialog);const controls=safeEl('div','window-controls');controls.append(close);header.append(controls);
+ const content=safeEl('div','modal-content');const summary=safeEl('div','profile-summary');summary.append(safeEl('span','avatar-icon large',account.avatar||'◆'));const details=safeEl('div');details.append(safeEl('h2','',account.name),safeEl('div','comment-help','Membro desde '+new Date(account.createdAt||Date.now()).toLocaleDateString('pt-BR')),safeEl('div','','Comentários publicados: '+comments.length),safeEl('div','','Mensagens enviadas/recebidas neste navegador: '+messages.length));summary.append(details);content.append(summary);if(account.bio){content.append(safeEl('h3','','Sobre mim'));content.append(safeEl('p','profile-bio',account.bio));}
+ const rules=safeEl('p','comment-help','Este perfil não exibe senha, e-mail nem outros dados privados. Os números refletem apenas os dados guardados neste navegador.');content.append(rules);
+ const actions=safeEl('div','profile-actions');if(activeUser&&activeUser.normalized===normalized){const edit=safeEl('button','retro-button','Editar meu perfil');edit.type='button';edit.addEventListener('click',()=>{closeAccountDialog();openAccountDialog();setTimeout(openEditProfile,0);});actions.append(edit);}if(activeUser&&activeUser.normalized!==normalized){const msg=safeEl('button','retro-button','Enviar mensagem');msg.type='button';msg.addEventListener('click',()=>{closeAccountDialog();$('messageRecipient').value=normalized;renderMessages();$('messageText').focus();$('messageForm').scrollIntoView({behavior:'smooth',block:'center'});});actions.append(msg);}const closeBtn=safeEl('button','retro-button','Fechar');closeBtn.type='button';closeBtn.addEventListener('click',closeAccountDialog);actions.append(closeBtn);content.append(actions);modal.append(header,content);backdrop.append(modal);host.append(backdrop);host.classList.remove('hidden');backdrop.addEventListener('click',e=>{if(e.target===backdrop)closeAccountDialog();});
+}
+function renderCommunity(){
+ const host=$('communityUsers'),select=$('messageRecipient');if(!host||!select)return;host.replaceChildren();const accounts=readAccounts().slice().sort((a,b)=>String(a.name).localeCompare(String(b.name),'pt-BR'));
+ const oldValue=select.value;select.replaceChildren();select.append(new Option('Escolha uma conta...',''));
+ for(const a of accounts){const option=new Option(a.name,a.normalized);if(activeUser&&a.normalized===activeUser.normalized)option.disabled=true;select.append(option);const card=safeEl('div','community-user');card.append(safeEl('span','avatar-icon',a.avatar||'◆'));const name=safeEl('span','community-user-name',a.name);card.append(name);const view=safeEl('button','retro-button small-button','Ver');view.type='button';view.addEventListener('click',()=>openProfile(a.normalized));card.append(view);host.append(card);}
+ if(accounts.length===0)host.append(safeEl('div','empty','Ainda não há contas locais para explorar.'));if(oldValue&&accounts.some(a=>a.normalized===oldValue&&(!activeUser||a.normalized!==activeUser.normalized)))select.value=oldValue;
+}
+function renderMessages(){
+ const host=$('messageList'),prompt=$('messagePrompt'),select=$('messageRecipient');if(!host||!prompt||!select)return;host.replaceChildren();if(!activeUser){prompt.textContent='Entre em uma conta para ver e enviar mensagens.';return;}prompt.textContent='Conectado como '+activeUser.name+'. Escolha um perfil para ver a conversa.';
+ const recipient=select.value;const accounts=readAccounts();if(recipient===activeUser.normalized){select.value='';return;}if(!recipient){host.append(safeEl('div','empty','Selecione uma conta para abrir a conversa.'));return;}
+ const known=accounts.some(a=>a.normalized===recipient);if(!known){host.append(safeEl('div','empty','Essa conta não está disponível.'));return;}
+ const msgs=read(MESSAGES_KEY,[]).filter(m=>(m.from===activeUser.normalized&&m.to===recipient)||(m.from===recipient&&m.to===activeUser.normalized)).slice(-100);
+ if(!msgs.length){host.append(safeEl('div','empty','Nenhuma mensagem nesta conversa ainda.'));return;}
+ const clearConversation=safeEl('button','retro-button small-button','Apagar conversa deste navegador');clearConversation.type='button';clearConversation.addEventListener('click',()=>{if(confirm('Apagar todas as mensagens desta conversa neste navegador?')){write(MESSAGES_KEY,read(MESSAGES_KEY,[]).filter(m=>!((m.from===activeUser.normalized&&m.to===recipient)||(m.from===recipient&&m.to===activeUser.normalized))));renderMessages();}});host.append(clearConversation);
+ msgs.forEach(m=>{const box=safeEl('article','message-item'+(m.from===activeUser.normalized?' mine':''));box.append(safeEl('div','message-meta',(m.from===activeUser.normalized?'Você':(accounts.find(a=>a.normalized===m.from)?.name||m.from))+' · '+new Date(m.createdAt).toLocaleString('pt-BR')));box.append(safeEl('div','comment-text',m.text));if(m.from===activeUser.normalized){const del=safeEl('button','retro-button small-button','Apagar minha mensagem');del.type='button';del.addEventListener('click',()=>{if(!confirm('Apagar esta mensagem deste navegador?'))return;write(MESSAGES_KEY,read(MESSAGES_KEY,[]).filter(x=>x.id!==m.id));renderMessages();});box.append(del);}host.append(box);});host.scrollTop=host.scrollHeight;
+}
+function sendPrivateMessage(event){
+ event.preventDefault();if(!activeUser){messageFeedback('Entre na sua conta antes de enviar mensagens.');return;}ensureSecurityScreen();const sec=getAccountSecurity(activeUser.normalized).record;if(isSuspended(sec)){messageFeedback('Sua conta está suspensa.');return;}
+ const to=$('messageRecipient').value,text=$('messageText').value.trim(),now=Date.now();if(!to){messageFeedback('Escolha uma conta para enviar a mensagem.');return;}if(to===activeUser.normalized){messageFeedback('Você não pode enviar mensagem para a própria conta.');return;}if(!readAccounts().some(a=>a.normalized===to)){messageFeedback('A conta destinatária não foi encontrada.');return;}if(text.length<2){messageFeedback('Escreva uma mensagem um pouco maior.');return;}if(text.length>600){messageFeedback('A mensagem ultrapassa 600 caracteres.');return;}
+ const issue=detectProblem(text);if(issue){recordViolation(issue);$('messageText').value='';messageFeedback('Mensagem bloqueada: '+issue+'. A central de segurança aplicou uma punição.');return;}
+ const rate=read(RATE_KEY,{}),key='message:'+activeUser.normalized, recent=Array.isArray(rate[key])?rate[key].filter(t=>now-t<30000):[],messages=read(MESSAGES_KEY,[]),normalizedText=text.toLocaleLowerCase('pt-BR').replace(/\s+/g,' ').trim();
+ const duplicate=messages.some(m=>m.from===activeUser.normalized&&m.to===to&&String(m.text||'').toLocaleLowerCase('pt-BR').replace(/\s+/g,' ').trim()===normalizedText&&now-Number(m.createdAt||0)<10*60*1000);const links=(text.match(/https?:\/\/|www\./gi)||[]).length;const letters=text.replace(/[^A-Za-zÀ-ÿ]/g,'');const caps=text.replace(/[^A-ZÀ-Ú]/g,'').length/Math.max(1,letters.length);let reason=null;if(recent.length>=4)reason='spam por excesso de mensagens';else if(duplicate)reason='mensagem repetida';else if(links>=4)reason='excesso de links';else if(text.length>=12&&caps>0.82)reason='texto em letras maiúsculas em excesso';if(reason){recordViolation(reason);$('messageText').value='';messageFeedback('Mensagem bloqueada pela segurança: '+reason+'.');return;}
+ recent.push(now);rate[key]=recent.slice(-10);write(RATE_KEY,rate);messages.push({id:'m_'+now+'_'+Math.random().toString(36).slice(2,8),from:activeUser.normalized,to,text,createdAt:now});if(!write(MESSAGES_KEY,messages)){messageFeedback('Não foi possível guardar a mensagem neste navegador.');return;}$('messageText').value='';messageFeedback('Mensagem enviada neste navegador.',false);renderMessages();
+}
+
+/* Comunidade local: busca por Nick, amizades e grupos. */
+const FRIENDS_KEY='rwa_friend_requests_v1';
+const GROUPS_KEY='rwa_groups_v1';
+const GROUP_MESSAGES_KEY='rwa_group_messages_v1';
+function readFriends(){const x=read(FRIENDS_KEY,[]);return Array.isArray(x)?x:[];}
+function readGroups(){const x=read(GROUPS_KEY,[]);return Array.isArray(x)?x:[];}
+function socialFeedback(message,isError=true){const el=$('groupFeedback');if(el){el.textContent=message;el.style.color=isError?'#9b1515':'#176b25';}}
+function isFriend(a,b){return readFriends().some(r=>r.status==='accepted'&&((r.from===a&&r.to===b)||(r.from===b&&r.to===a)));}
+function renderNickSearch(){const host=$('nickSearchResults');if(!host)return;host.replaceChildren();const q=($('nickSearchInput')?.value||'').trim();if(!q){host.append(safeEl('div','empty','Digite um Nick para pesquisar contas.'));return;}const matches=readAccounts().filter(a=>a.name.toLocaleLowerCase('pt-BR').includes(q.toLocaleLowerCase('pt-BR'))).sort((a,b)=>a.name.localeCompare(b.name,'pt-BR')).slice(0,30);if(!matches.length){host.append(safeEl('div','empty','Nenhuma conta encontrada com esse Nick.'));return;}for(const a of matches){const row=safeEl('div','community-user');row.append(safeEl('span','avatar-icon',a.avatar||'◆'),safeEl('span','community-user-name',a.name));const view=safeEl('button','retro-button small-button','Ver perfil');view.type='button';view.addEventListener('click',()=>openProfile(a.normalized));row.append(view);if(activeUser&&a.normalized!==activeUser.normalized&&!isFriend(activeUser.normalized,a.normalized)){const req=readFriends().some(r=>r.status==='pending'&&r.from===activeUser.normalized&&r.to===a.normalized);const add=safeEl('button','retro-button small-button',req?'Pedido enviado':'Adicionar');add.type='button';add.disabled=req;add.addEventListener('click',()=>sendFriendRequest(a.normalized));row.append(add);}host.append(row);}}
+function sendFriendRequest(to){if(!activeUser){toastAccount('Entre na sua conta para adicionar amigos.');return;}if(to===activeUser.normalized){toastAccount('Você não pode adicionar a si mesmo.');return;}if(!readAccounts().some(a=>a.normalized===to)){toastAccount('Essa conta não foi encontrada.');return;}if(isFriend(activeUser.normalized,to)){toastAccount('Vocês já são amigos.');return;}const requests=readFriends();if(requests.some(r=>r.status==='pending'&&r.from===to&&r.to===activeUser.normalized)){requests.forEach(r=>{if(r.status==='pending'&&r.from===to&&r.to===activeUser.normalized)r.status='accepted';});requests.push({from:activeUser.normalized,to,status:'accepted',createdAt:Date.now()});write(FRIENDS_KEY,requests);renderSocial();renderNickSearch();toastAccount('Pedido aceito. Vocês agora são amigos.');return;}if(requests.some(r=>r.status==='pending'&&r.from===activeUser.normalized&&r.to===to)){toastAccount('Você já enviou um pedido para essa pessoa.');return;}requests.push({from:activeUser.normalized,to,status:'pending',createdAt:Date.now()});write(FRIENDS_KEY,requests);renderSocial();renderNickSearch();toastAccount('Pedido de amizade enviado neste navegador.');}
+function isGroupAdmin(g){return !!activeUser&&(g.createdBy===activeUser.normalized||(g.admins||[]).includes(activeUser.normalized));}
+function renderGroupSearch(){const host=$('groupSearchResults');if(!host)return;host.replaceChildren();const q=($('groupSearchInput')?.value||'').trim().toLocaleLowerCase('pt-BR');const groups=readGroups().filter(g=>g.name.toLocaleLowerCase('pt-BR').includes(q));if(!groups.length){host.append(safeEl('div','empty','Nenhum grupo encontrado.'));return;}groups.forEach(g=>{const row=safeEl('div','social-row');row.append(safeEl('span','social-label',g.name+' · '+g.members.length+' membro(s)'+(g.public===false?' · privado':' · público')));if(activeUser&&!g.members.includes(activeUser.normalized)){const req=read(GROUP_REQUESTS_KEY,[]).some(r=>r.groupId===g.id&&r.user===activeUser.normalized&&r.status==='pending');const b=safeEl('button','retro-button small-button',req?'Pedido enviado':'Solicitar entrada');b.type='button';b.disabled=req||g.public===false;b.addEventListener('click',()=>{const a=read(GROUP_REQUESTS_KEY,[]);a.push({id:'gr_'+Date.now()+'_'+Math.random().toString(36).slice(2,6),groupId:g.id,user:activeUser.normalized,status:'pending',createdAt:Date.now()});write(GROUP_REQUESTS_KEY,a);renderGroupSearch();socialFeedback('Solicitação de entrada enviada.',false);});row.append(b);}host.append(row);});}
+const GROUP_REQUESTS_KEY='rwa_group_requests_v1';
+function groupAdminPanel(g){const host=$('groupAdminPanel');if(!host)return;host.replaceChildren();host.classList.toggle('hidden',!isGroupAdmin(g));if(!isGroupAdmin(g))return;host.append(safeEl('h4','','Painel do administrador'));const reqs=read(GROUP_REQUESTS_KEY,[]).filter(r=>r.groupId===g.id&&r.status==='pending');if(reqs.length){host.append(safeEl('strong','','Solicitações para entrar'));reqs.forEach(r=>{const a=readAccounts().find(x=>x.normalized===r.user);const row=safeEl('div','social-row',(a?.name||r.user));const yes=safeEl('button','retro-button small-button','Aceitar');yes.type='button';yes.addEventListener('click',()=>{const groups=readGroups(),target=groups.find(x=>x.id===g.id);if(target&&!target.members.includes(r.user))target.members.push(r.user);write(GROUPS_KEY,groups);const all=read(GROUP_REQUESTS_KEY,[]);const x=all.find(z=>z.id===r.id);if(x)x.status='accepted';write(GROUP_REQUESTS_KEY,all);renderSocial();$('groupSelect').value=g.id;renderGroupChat();});const no=safeEl('button','retro-button small-button','Recusar');no.type='button';no.addEventListener('click',()=>{const all=read(GROUP_REQUESTS_KEY,[]);const x=all.find(z=>z.id===r.id);if(x)x.status='rejected';write(GROUP_REQUESTS_KEY,all);groupAdminPanel(readGroups().find(x=>x.id===g.id));});row.append(yes,no);host.append(row);});}else host.append(safeEl('div','comment-help','Nenhuma solicitação pendente.'));
+const addLabel=safeEl('label','','Adicionar qualquer conta pelo Nick');const addRow=safeEl('div','community-search');const inp=safeEl('input');inp.placeholder='Nick exato';inp.maxLength=20;const add=safeEl('button','retro-button small-button','Adicionar');add.type='button';add.addEventListener('click',()=>{const acc=readAccounts().find(a=>a.name===inp.value.trim());if(!acc){socialFeedback('Nick não encontrado.');return;}const groups=readGroups(),target=groups.find(x=>x.id===g.id);if(target&&!target.members.includes(acc.normalized)){target.members.push(acc.normalized);write(GROUPS_KEY,groups);renderSocial();$('groupSelect').value=g.id;renderGroupChat();}});addRow.append(inp,add);host.append(addLabel,addRow,safeEl('strong','','Gerenciar membros'));
+g.members.forEach(id=>{const a=readAccounts().find(x=>x.normalized===id);const row=safeEl('div','social-row');const roleName=id===g.createdBy?'Criador':((g.roles||{})[id]||((g.admins||[]).includes(id)?'Administrador':'Membro'));row.append(safeEl('span','social-label',(a?.name||id)+' · '+roleName));if(id!==g.createdBy){const role=safeEl('select');['Membro','Moderador','Administrador','VIP'].forEach(r=>role.append(new Option(r,r)));role.value=(g.roles||{})[id]||((g.admins||[]).includes(id)?'Administrador':'Membro');role.addEventListener('change',()=>{const groups=readGroups(),target=groups.find(x=>x.id===g.id);target.roles=target.roles||{};target.roles[id]=role.value;target.admins=(target.admins||[]).filter(x=>x!==id);if(role.value==='Administrador'||role.value==='Moderador')target.admins.push(id);write(GROUPS_KEY,groups);renderGroupChat();});const kick=safeEl('button','retro-button small-button','Expulsar');kick.type='button';kick.addEventListener('click',()=>{if(!confirm('Expulsar este membro?'))return;const groups=readGroups(),target=groups.find(x=>x.id===g.id);target.members=target.members.filter(x=>x!==id);target.admins=(target.admins||[]).filter(x=>x!==id);write(GROUPS_KEY,groups);renderSocial();$('groupSelect').value=g.id;renderGroupChat();});const mute=safeEl('button','retro-button small-button','Silenciar 5 min');mute.type='button';mute.addEventListener('click',()=>{const groups=readGroups(),target=groups.find(x=>x.id===g.id),now=Date.now();target.muteCooldowns=target.muteCooldowns||{};target.mutes=target.mutes||{};if((target.muteCooldowns[id]||0)>now){socialFeedback('Cooldown ativo: aguarde '+Math.ceil((target.muteCooldowns[id]-now)/60000)+' minuto(s).');return;}target.mutes[id]={until:now+5*60*1000,by:activeUser.normalized};target.muteCooldowns[id]=now+10*60*1000;write(GROUPS_KEY,groups);socialFeedback('Membro silenciado por até 5 minutos. Cooldown de 10 minutos.',false);});row.append(role,kick,mute);}host.append(row);});}
+function renderSocial(){const reqHost=$('friendRequests'),friendsHost=$('friendList'),groupsHost=$('groupList'),groupSelect=$('groupSelect'),inviteSelect=$('groupInviteUser');if(!reqHost||!friendsHost||!groupsHost||!groupSelect||!inviteSelect)return;reqHost.replaceChildren();friendsHost.replaceChildren();groupsHost.replaceChildren();if(!activeUser){reqHost.append(safeEl('div','empty','Entre em uma conta para gerenciar amizades.'));friendsHost.append(safeEl('div','empty','Sua lista de amigos aparecerá aqui.'));groupsHost.append(safeEl('div','empty','Entre em uma conta para criar ou participar de grupos.'));groupSelect.replaceChildren(new Option('Entre em uma conta...',''));inviteSelect.replaceChildren(new Option('Entre em uma conta...',''));$('groupAdminPanel')?.classList.add('hidden');return;}const requests=readFriends();const incoming=requests.filter(r=>r.status==='pending'&&r.to===activeUser.normalized);if(!incoming.length)reqHost.append(safeEl('div','empty','Nenhum pedido de amizade pendente.'));incoming.forEach(r=>{const acc=readAccounts().find(a=>a.normalized===r.from);if(!acc)return;const row=safeEl('div','social-row',acc.name);['Aceitar','Recusar'].forEach(label=>{const b=safeEl('button','retro-button small-button',label);b.type='button';b.addEventListener('click',()=>{const all=readFriends();if(label==='Aceitar')all.forEach(x=>{if(x.status==='pending'&&x.from===r.from&&x.to===activeUser.normalized)x.status='accepted';});else write(FRIENDS_KEY,all.filter(x=>x!==r));if(label==='Aceitar')write(FRIENDS_KEY,all);renderSocial();});row.append(b);});reqHost.append(row);});const friendIds=[...new Set(requests.filter(r=>r.status==='accepted'&&(r.from===activeUser.normalized||r.to===activeUser.normalized)).map(r=>r.from===activeUser.normalized?r.to:r.from))];if(!friendIds.length)friendsHost.append(safeEl('div','empty','Você ainda não tem amigos.'));friendIds.forEach(id=>{const a=readAccounts().find(x=>x.normalized===id);if(!a)return;const row=safeEl('div','social-row',(a.avatar||'◆')+' '+a.name);const rem=safeEl('button','retro-button small-button','Remover');rem.type='button';rem.addEventListener('click',()=>{write(FRIENDS_KEY,readFriends().filter(r=>!(r.status==='accepted'&&((r.from===activeUser.normalized&&r.to===id)||(r.from===id&&r.to===activeUser.normalized)))));renderSocial();});row.append(rem);friendsHost.append(row);});const groups=readGroups(),myGroups=groups.filter(g=>g.members.includes(activeUser.normalized));if(!myGroups.length)groupsHost.append(safeEl('div','empty','Você ainda não participa de grupos.'));myGroups.forEach(g=>{const row=safeEl('div','social-row',g.name+' · '+g.members.length+' membro(s)');const open=safeEl('button','retro-button small-button','Abrir');open.type='button';open.addEventListener('click',()=>{groupSelect.value=g.id;renderGroupChat();});row.append(open);if(g.createdBy===activeUser.normalized){const del=safeEl('button','retro-button small-button','Excluir grupo');del.type='button';del.addEventListener('click',()=>{if(confirm('Excluir grupo e mensagens?')){write(GROUPS_KEY,readGroups().filter(x=>x.id!==g.id));write(GROUP_MESSAGES_KEY,read(GROUP_MESSAGES_KEY,[]).filter(m=>m.groupId!==g.id));renderSocial();}});row.append(del);}groupsHost.append(row);});groupSelect.replaceChildren(new Option('Escolha um grupo...',''));myGroups.forEach(g=>groupSelect.append(new Option(g.name,g.id)));inviteSelect.replaceChildren(new Option('Escolha um amigo...',''));readAccounts().filter(a=>a.normalized!==activeUser.normalized).forEach(a=>inviteSelect.append(new Option(a.name,a.normalized)));renderGroupSearch();renderGroupChat();}
+function createGroup(event){event.preventDefault();if(!activeUser){socialFeedback('Entre na sua conta para criar um grupo.');return;}const sec=getAccountSecurity(activeUser.normalized).record;if(isSuspended(sec)){ensureSecurityScreen();socialFeedback('Sua conta está suspensa.');return;}const field=$('groupName'),name=field.value.trim();if(name.length<3||name.length>30){socialFeedback('O nome do grupo precisa ter de 3 a 30 caracteres.');return;}const groups=readGroups();const group={id:'g_'+Date.now().toString(36)+'_'+Math.random().toString(36).slice(2,7),name,createdBy:activeUser.normalized,admins:[],roles:{},members:[activeUser.normalized],public:true,createdAt:Date.now()};groups.push(group);if(!write(GROUPS_KEY,groups)){socialFeedback('Não foi possível salvar o grupo.');return;}field.value='';socialFeedback('Grupo criado. Você é o administrador principal.',false);renderSocial();$('groupSelect').value=group.id;renderGroupChat();}
+function renderGroupChat(){const select=$('groupSelect'),host=$('groupMessages'),members=$('groupMembers');if(!select||!host||!members)return;host.replaceChildren();if(!activeUser){members.textContent='Entre para ver os grupos.';return;}const group=readGroups().find(g=>g.id===select.value&&g.members.includes(activeUser.normalized));if(!group){members.textContent='Selecione um grupo do qual você participa.';$('groupAdminPanel')?.classList.add('hidden');return;}select.dataset.selected=group.id;members.textContent='Membros: '+group.members.map(id=>{const a=readAccounts().find(x=>x.normalized===id);return (a?.name||id)+' ('+(id===group.createdBy?'Criador':((group.roles||{})[id]||'Membro'))+')';}).join(', ');groupAdminPanel(group);const msgs=read(GROUP_MESSAGES_KEY,[]).filter(m=>m.groupId===group.id).slice(-100);if(!msgs.length)host.append(safeEl('div','empty','Ainda não há mensagens neste grupo.'));msgs.forEach(m=>{const box=safeEl('article','message-item'+(m.from===activeUser.normalized?' mine':''));box.append(safeEl('div','message-meta',(readAccounts().find(a=>a.normalized===m.from)?.name||m.from)+' · '+new Date(m.createdAt).toLocaleString('pt-BR')));box.append(safeEl('div','comment-text',m.text));if(m.from===activeUser.normalized||isGroupAdmin(group)){const del=safeEl('button','retro-button small-button','Apagar mensagem');del.type='button';del.addEventListener('click',()=>{write(GROUP_MESSAGES_KEY,read(GROUP_MESSAGES_KEY,[]).filter(x=>x.id!==m.id));renderGroupChat();});box.append(del);}host.append(box);});host.scrollTop=host.scrollHeight;}
+function inviteFriendToGroup(event){event.preventDefault();if(!activeUser){socialFeedback('Entre na sua conta para gerenciar grupos.');return;}const id=$('groupSelect').value,user=$('groupInviteUser').value,groups=readGroups(),g=groups.find(x=>x.id===id&&isGroupAdmin(x));if(!g){socialFeedback('Somente administradores podem adicionar membros.');return;}if(!user||!readAccounts().some(a=>a.normalized===user)){socialFeedback('Escolha uma conta válida.');return;}if(g.members.includes(user)){socialFeedback('Essa pessoa já está no grupo.');return;}g.members.push(user);write(GROUPS_KEY,groups);socialFeedback('Conta adicionada ao grupo.',false);renderSocial();$('groupSelect').value=id;renderGroupChat();}
+function sendGroupMessage(event){event.preventDefault();if(!activeUser){socialFeedback('Entre na sua conta para enviar mensagens.');return;}const group=readGroups().find(g=>g.id===$('groupSelect').value&&g.members.includes(activeUser.normalized));if(!group){socialFeedback('Selecione um grupo do qual você participa.');return;}const sec=getAccountSecurity(activeUser.normalized).record;if(isSuspended(sec)){ensureSecurityScreen();socialFeedback('Sua conta está suspensa.');return;}const muted=(group.mutes||{})[activeUser.normalized];if(muted&&muted.until>Date.now()){socialFeedback('Você está silenciado neste grupo até '+new Date(muted.until).toLocaleTimeString('pt-BR')+'.');return;}const field=$('groupMessageText'),text=field.value.trim();if(text.length<2||text.length>600){socialFeedback('A mensagem precisa ter de 2 a 600 caracteres.');return;}const issue=detectProblem(text);if(issue){recordViolation(issue);field.value='';socialFeedback('Mensagem bloqueada pela segurança: '+issue);return;}const all=read(GROUP_MESSAGES_KEY,[]),now=Date.now(),recent=all.filter(m=>m.groupId===group.id&&m.from===activeUser.normalized&&now-m.createdAt<30000);if(recent.length>=4||all.some(m=>m.groupId===group.id&&m.from===activeUser.normalized&&m.text.toLocaleLowerCase('pt-BR')===text.toLocaleLowerCase('pt-BR')&&now-m.createdAt<600000)){recordViolation(recent.length>=4?'spam em grupo':'mensagem repetida em grupo');field.value='';socialFeedback('Mensagem bloqueada pelo sistema de segurança.');return;}all.push({id:'gm_'+now+'_'+Math.random().toString(36).slice(2,8),groupId:group.id,from:activeUser.normalized,text,createdAt:now});if(!write(GROUP_MESSAGES_KEY,all)){socialFeedback('Não foi possível salvar a mensagem.');return;}field.value='';renderGroupChat();socialFeedback('Mensagem enviada ao grupo neste navegador.',false);}
+$('groupSearchBtn')?.addEventListener('click',renderGroupSearch);$('groupSearchInput')?.addEventListener('keydown',e=>{if(e.key==='Enter'){e.preventDefault();renderGroupSearch();}});
+$('nickSearchInput')?.addEventListener('keydown',e=>{if(e.key==='Enter'){e.preventDefault();renderNickSearch();}});$('createGroupForm')?.addEventListener('submit',createGroup);$('groupInviteForm')?.addEventListener('submit',inviteFriendToGroup);$('groupMessageForm')?.addEventListener('submit',sendGroupMessage);$('groupSelect')?.addEventListener('change',renderGroupChat);
+
+const SECURITY_KEY='rwa_security_state_v2';
+const RATE_KEY='rwa_comment_rate_v2';
+function getSecurity(){const x=read(SECURITY_KEY,{});return x&&typeof x==='object'?x:{};}
+function saveSecurity(data){return write(SECURITY_KEY,data);}
+function getModeration(){return read(MOD_KEY,{});}
+function saveModeration(data){write(MOD_KEY,data);}
+function detectProblem(text){
+ const checks=[
+  {type:'ameaça',re:/\b(vou|vamos|queria|quero|pretendo|vou mesmo)\b.{0,65}\b(te|lhe|voc[eê]|ele|ela|voc[eê]s)?\s*(matar|machucar|agredir|atacar|espancar|ferir|ameaçar|bater)\b/i},
+  {type:'ameaça',re:/\b(ameaço|ameaçar|ameaça|te pego|vai se arrepender|vou atrás de você|vou acabar com você)\b/i},
+  {type:'exposição de dados pessoais',re:/\b(meu endereço|moro na rua|meu telefone|meu número é|cpf[:\s]|senha[:\s]|número do cartão|endereço de .{2,30})\b/i},
+  {type:'assédio',re:/\b(vou divulgar suas fotos|vou expor seus dados|vou doxxar|te perseguir|perseguir você|vou humilhar|vou ameaçar)\b/i},
+  {type:'conteúdo perigoso',re:/\b(bomba caseira|como fabricar explosivo|envenenar alguém|incendiar a casa de|como machucar alguém)\b/i}
+ ];
+ for(const check of checks)if(check.re.test(text))return check.type;
+ return null;
+}
+function getAccountSecurity(normalized){
+ const all=getSecurity();
+ if(!all[normalized])all[normalized]={strikes:0,banUntil:0,permanent:false,reason:'',updatedAt:Date.now()};
+ return {all,record:all[normalized]};
+}
+function isSuspended(record,now=Date.now()){
+ return !!record.permanent || Number(record.banUntil||0)>now;
+}
+function formatRemaining(record){
+ if(record.permanent)return 'permanentemente';
+ const ms=Math.max(0,Number(record.banUntil||0)-Date.now());
+ const mins=Math.ceil(ms/60000);
+ if(mins>=1440)return Math.ceil(mins/1440)+' dia(s)';
+ if(mins>=60)return Math.ceil(mins/60)+' hora(s)';
+ return mins+' minuto(s)';
+}
+function ensureSecurityScreen(){
+ const existing=document.getElementById('securityLockScreen');
+ if(!activeUser){existing?.remove();return;}
+ const {record}=getAccountSecurity(activeUser.normalized);
+ if(!isSuspended(record)){existing?.remove();return;}
+ if(existing){
+  const remain=existing.querySelector('[data-security-remaining]');
+  if(remain)remain.textContent=record.permanent?'Suspensão permanente':('Tempo restante aproximado: '+formatRemaining(record));
+  return;
+ }
+ const screen=document.createElement('div');
+ screen.id='securityLockScreen';
+ screen.setAttribute('role','alertdialog');
+ screen.setAttribute('aria-modal','true');
+ screen.innerHTML='<div class="security-lock-window"><div class="security-lock-title">Central de segurança — Retro Windows Archive</div><div class="security-lock-body"><div class="security-lock-symbol">!</div><h2>Conta suspensa</h2><p>O sistema de segurança bloqueou temporariamente o acesso desta conta após detectar atividade contrária às regras do mural.</p><p class="security-lock-reason"></p><p class="security-lock-remaining" data-security-remaining></p><p class="security-lock-note">Atualizar a página não encerra esta suspensão. A conta continuará bloqueada neste navegador até o prazo terminar.</p><button type="button" id="securityRefreshBtn" class="retro-button">Verificar novamente</button></div></div>';
+  const style=document.createElement('style');
+  style.textContent='#securityLockScreen{position:fixed;inset:0;z-index:2147483647;background:rgba(12,28,54,.88);display:flex;align-items:center;justify-content:center;padding:18px;font-family:Tahoma,Arial,sans-serif;color:#222}#securityLockScreen .security-lock-window{width:min(520px,100%);background:#ece9d8;border:1px solid #003c74;box-shadow:0 12px 38px #0008}#securityLockScreen .security-lock-title{background:linear-gradient(#3288e8,#0754a6);color:white;font-weight:bold;padding:11px 14px;border-bottom:1px solid #003c74}#securityLockScreen .security-lock-body{padding:22px;text-align:center}#securityLockScreen h2{margin:8px 0 14px;color:#8c1616}#securityLockScreen p{line-height:1.5}#securityLockScreen .security-lock-symbol{display:inline-flex;width:44px;height:44px;align-items:center;justify-content:center;border-radius:50%;background:#a82020;color:white;font-size:28px;font-weight:bold}#securityLockScreen .security-lock-note{font-size:12px;color:#555;border-top:1px solid #c6c3b4;padding-top:12px}body.security-locked{overflow:hidden}';
+  document.head.appendChild(style);
+  document.body.appendChild(screen);
+  screen.querySelector('.security-lock-reason').textContent='Motivo registrado: '+(record.reason||'violação das regras do mural')+'.';
+  screen.querySelector('[data-security-remaining]').textContent=record.permanent?'Suspensão permanente':('Tempo restante aproximado: '+formatRemaining(record));
+  screen.querySelector('#securityRefreshBtn').addEventListener('click',()=>{screen.remove();ensureSecurityScreen();});
+  document.body.classList.add('security-locked');
+  const observer=new MutationObserver(()=>{if(activeUser && isSuspended(getAccountSecurity(activeUser.normalized).record) && !document.getElementById('securityLockScreen')){document.body.appendChild(screen);}});
+  observer.observe(document.body,{childList:true});
+}
+function recordViolation(reason){
+ if(!activeUser)return;
+ const now=Date.now(), {all,record}=getAccountSecurity(activeUser.normalized);
+ record.strikes=(Number(record.strikes)||0)+1;
+ record.reason=reason;record.updatedAt=now;
+ const levels=[60*1000,10*60*1000,60*60*1000,24*60*60*1000];
+ if(record.strikes>=5){record.permanent=true;record.banUntil=0;}
+ else {record.permanent=false;record.banUntil=now+levels[Math.min(record.strikes-1,levels.length-1)];}
+ all[activeUser.normalized]=record;saveSecurity(all);
+ const legacy=getModeration();legacy[activeUser.normalized]=record.permanent?'permanent':record.banUntil;legacy[activeUser.normalized+'_strikes']=record.strikes;saveModeration(legacy);
+ ensureSecurityScreen();
+}
+function postComment(event){
+ event.preventDefault();
+ if(!activeUser){feedback('Entre na sua conta local antes de comentar.');return;}
+ ensureSecurityScreen();
+ const security=getAccountSecurity(activeUser.normalized).record;
+ if(isSuspended(security)){feedback('Sua conta está suspensa. A tela de segurança continuará ativa até o fim da suspensão.');return;}
+ const field=$('commentText'), text=field.value.trim(), now=Date.now();
+ if(text.length<2){feedback('Escreva um comentário um pouco maior.');return;}
+ if(text.length>600){feedback('O comentário ultrapassa 600 caracteres.');return;}
+ const issue=detectProblem(text);
+ if(issue){recordViolation(issue);field.value='';feedback('Comentário bloqueado: '+issue+'. A suspensão foi aplicada pela central de segurança.');return;}
+ const rate=read(RATE_KEY,{});
+ const userRate=Array.isArray(rate[activeUser.normalized])?rate[activeUser.normalized]:[];
+ const recent=userRate.filter(t=>now-t<30000);
+ const comments=readComments();
+ const normalizedText=text.toLocaleLowerCase('pt-BR').replace(/\s+/g,' ').trim();
+ const duplicate=comments.some(c=>c.authorNormalized===activeUser.normalized && String(c.text||'').toLocaleLowerCase('pt-BR').replace(/\s+/g,' ').trim()===normalizedText && now-Number(c.createdAt||0)<10*60*1000);
+ const links=(text.match(/https?:\/\/|www\./gi)||[]).length;
+ const mostlyCaps=text.length>=12 && (text.replace(/[^A-ZÀ-Ú]/g,'').length/Math.max(1,text.replace(/[^A-Za-zÀ-ÿ]/g,'').length))>0.82;
+ let spamReason=null;
+ if(recent.length>=4)spamReason='spam por excesso de publicações';
+ else if(duplicate)spamReason='comentário repetido';
+ else if(links>=4)spamReason='excesso de links';
+ else if(mostlyCaps)spamReason='texto em letras maiúsculas em excesso';
+ if(spamReason){recordViolation(spamReason);field.value='';feedback('Publicação bloqueada pela segurança: '+spamReason+'.');return;}
+ recent.push(now);rate[activeUser.normalized]=recent.slice(-10);write(RATE_KEY,rate);
+ comments.push({id:'c_'+now+'_'+Math.random().toString(36).slice(2,8),author:activeUser.name,authorNormalized:activeUser.normalized,text,createdAt:now});
+ if(!write(COMMENTS_KEY,comments)){feedback('Não foi possível guardar o comentário neste navegador.');return;}
+ field.value='';feedback('Comentário publicado.',false);renderComments();
+}
+$('accountBtn')?.addEventListener('click',openAccountDialog);
+$('modalHost')?.addEventListener('click',event=>{
+ if(event.target.closest('[data-account-close]')||event.target.matches('[data-account-backdrop]'))closeAccountDialog();
+});
+$('commentForm')?.addEventListener('submit',postComment);
+$('messageForm')?.addEventListener('submit',sendPrivateMessage);
+$('messageRecipient')?.addEventListener('change',renderMessages);
+$('nickSearchBtn')?.addEventListener('click',renderNickSearch);
+$('modalHost')?.addEventListener('click',event=>{if(event.target.matches('[data-profile-backdrop]'))closeAccountDialog();});
+migrateCaseSensitiveNames();
+try{
+ const session=read(SESSION_KEY,null),accounts=read(ACCOUNT_KEY,[]);
+ if(session?.normalized){const found=accounts.find(a=>a.normalized===session.normalized);if(found)activeUser={name:found.name,normalized:found.normalized,avatar:found.avatar||'◆'};}
+}catch(_){}
+updateAccountUI();renderComments();renderCommunity();renderMessages();renderSocial();ensureSecurityScreen();
+setInterval(()=>{if(activeUser){const record=getAccountSecurity(activeUser.normalized).record;if(!isSuspended(record)){document.getElementById('securityLockScreen')?.remove();document.body.classList.remove('security-locked');}else ensureSecurityScreen();}},1000);
+})();
+</script>
+
+</body>
+</html>
